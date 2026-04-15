@@ -1,205 +1,251 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Profile</title>
+    <meta charset="UTF-8">
+    <title>Student Profile | Mentor Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
-
-        body{
-        font-family:Arial;
-        background:#f5f6fa;
-        margin:0;
+        :root {
+          --bg: #0a0e27;
+          --card: rgba(255, 255, 255, 0.05);
+          --accent: #667eea;
+          --muted: #a0aec0;
+          --radius: 12px;
+          --border: rgba(255, 255, 255, 0.1);
         }
 
-        .header{
-        background:#2f3640;
-        color:white;
-        padding:15px;
-        font-size:20px;
+        * { box-sizing: border-box; }
+
+        /* HIDE SCROLLBAR */
+        html, body {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        html::-webkit-scrollbar { display: none; }
+
+        body {
+          margin: 0;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          background: var(--bg);
+          color: #ffffff;
+          min-height: 100vh;
         }
 
-        .container{
-        padding:30px;
+        /* Starfield background */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background-image:
+            radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 150px 150px, #ddd, rgba(0,0,0,0));
+          background-repeat: repeat;
+          background-size: 300px 300px;
+          z-index: 1;
+          pointer-events: none;
         }
 
-        .card{
-        background:white;
-        padding:20px;
-        margin-bottom:20px;
-        border-radius:8px;
-        box-shadow:0 2px 6px rgba(0,0,0,0.1);
+        body > * { position: relative; z-index: 2; }
+
+        .header {
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 24px;
+          background: rgba(10, 14, 39, 0.8);
+          border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+          backdrop-filter: blur(12px);
+          position: sticky;
+          top: 0;
         }
 
-        table{
-        width:100%;
-        border-collapse:collapse;
-        margin-top:10px;
+        .container {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 32px 20px;
         }
 
-        th,td{
-        border:1px solid #ddd;
-        padding:8px;
-        text-align:left;
+        .card {
+          background: var(--card);
+          backdrop-filter: blur(15px);
+          border-radius: var(--radius);
+          padding: 24px;
+          border: 1px solid var(--border);
+          margin-bottom: 24px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        th{
-        background:#f1f2f6;
+        h2 { 
+            font-size: 18px; 
+            font-weight: 700; 
+            margin-bottom: 20px; 
+            color: var(--accent); 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
         }
 
-        .status-approved{
-        color:green;
-        font-weight:bold;
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
 
-        .status-pending{
-        color:orange;
-        font-weight:bold;
+        .info-item b { color: var(--muted); font-size: 12px; display: block; text-transform: uppercase; margin-bottom: 4px; }
+        .info-item span { font-size: 16px; font-weight: 500; color: white; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: rgba(255,255,255,0.03); color: var(--muted); text-align: left; padding: 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; color: #e2e8f0; }
+
+        .status-approved { color: #4ade80; font-weight: 700; font-size: 12px; }
+        .status-pending { color: #fbbf24; font-weight: 700; font-size: 12px; }
+
+        .btn-container { display: flex; gap: 12px; margin-bottom: 24px; }
+
+        .export-btn, .back-btn {
+          padding: 10px 20px;
+          border: none;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          cursor: pointer;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          text-decoration: none;
         }
 
-        .export-btn{
-        margin-bottom:20px;
-        padding:10px 15px;
-        border:none;
-        background:#2f3640;
-        color:white;
-        cursor:pointer;
-        border-radius:4px;
-        }
+        .back-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
+        .back-btn:hover { background: rgba(255,255,255,0.1); }
+        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
 
+        /* PDF Styles - Specific to Export */
+        @media print {
+            body { background: white; color: black; }
+            .card { border: 1px solid #ccc; box-shadow: none; background: white; page-break-inside: avoid; }
+            .export-btn, .back-btn, .header { display: none; }
+        }
     </style>
-
 </head>
 
 <body>
 
 <div class="header">
-    Student Profile
+    <span style="font-weight: 700; letter-spacing: 1px;">STUDENT DOSSIER</span>
+    <button class="back-btn" onclick="history.back()">← Back</button>
 </div>
 
-<div class="container">
+<div class="container" id="profileArea">
 
-    <button class="export-btn" onclick="exportProfile()">Export Profile</button>
+    <div class="btn-container">
+        <button class="export-btn" onclick="exportProfile()">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+            Export as PDF
+        </button>
+    </div>
 
     <div class="card">
-
         <h2>Student Information</h2>
-
-        <p><b>Name:</b> <span id="name"></span></p>
-        <p><b>USN:</b> <span id="usn"></span></p>
-        <p><b>Department:</b> <span id="department"></span></p>
-        <p><b>Academic Year:</b> <span id="year"></span></p>
-
+        <div class="info-grid">
+            <div class="info-item"><b>Full Name</b><span id="name">...</span></div>
+            <div class="info-item"><b>USN</b><span id="usn">...</span></div>
+            <div class="info-item"><b>Department</b><span id="department">...</span></div>
+            <div class="info-item"><b>Academic Year</b><span id="year">...</span></div>
+        </div>
     </div>
 
     <div class="card">
-
-        <h2>Marks</h2>
-
+        <h2>Academic Performance</h2>
         <table>
-
             <thead>
-            <tr>
-                <th>Semester</th>
-                <th>Marks</th>
-                <th>Status</th>
-            </tr>
+                <tr>
+                    <th>Semester</th>
+                    <th>Total Marks</th>
+                    <th>Status</th>
+                </tr>
             </thead>
-
             <tbody id="marksTable"></tbody>
-
         </table>
-
     </div>
 
     <div class="card">
-
-        <h2>Certificates</h2>
-
+        <h2>Activity Certificates</h2>
         <table>
-
             <thead>
-            <tr>
-                <th>Title</th>
-                <th>Status</th>
-            </tr>
+                <tr>
+                    <th>Certificate Title</th>
+                    <th>Validation Status</th>
+                </tr>
             </thead>
-
             <tbody id="certTable"></tbody>
-
         </table>
-
     </div>
 
 </div>
 
-<!-- Correct way to load html2pdf -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-
     const params = new URLSearchParams(window.location.search);
-    const studentId = params.get("studentId");
-
-    if(!studentId){
-    alert("Student ID missing in URL");
-    }
+    const studentId = params.get("usn"); // Changed to 'usn' to match your filter button logic
 
     async function loadProfile(){
+        if(!studentId) return;
 
-    const res = await fetch(`/api/mentor/student/${studentId}`,{
-    credentials:"include"
-    });
+        try {
+            const res = await fetch(`/api/mentor/student/${studentId}`, { credentials:"include" });
+            const data = await res.json();
+            const student = data.student;
 
-    const data = await res.json();
+            document.getElementById("name").innerText = student.name;
+            document.getElementById("usn").innerText = student.usn;
+            document.getElementById("department").innerText = student.department;
+            document.getElementById("year").innerText = "Year " + student.academicYear;
 
-    const student = data.student;
+            document.getElementById("marksTable").innerHTML = data.marks.map(m=>`
+                <tr>
+                    <td>Semester ${m.semester ?? "-"}</td>
+                    <td style="font-family: monospace; font-size: 16px; color:white;">${m.totalMarks ?? "-"}</td>
+                    <td><span class="${m.validated ? 'status-approved':'status-pending'}">
+                        ${m.validated ? '● APPROVED':'○ PENDING'}
+                    </span></td>
+                </tr>
+            `).join("");
 
-    document.getElementById("name").innerText = student.name;
-    document.getElementById("usn").innerText = student.usn;
-    document.getElementById("department").innerText = student.department;
-    document.getElementById("year").innerText = student.academicYear;
+            document.getElementById("certTable").innerHTML = data.certificates.map(c=>`
+                <tr>
+                    <td style="color:white;">${c.title ?? "-"}</td>
+                    <td><span class="${c.status === 'APPROVED' ? 'status-approved':'status-pending'}">
+                        ${c.status ?? "PENDING"}
+                    </span></td>
+                </tr>
+            `).join("");
+        } catch(e) {
+            console.error("Failed to load profile", e);
+        }
+    }
 
-    document.getElementById("marksTable").innerHTML =
-    data.marks.map(m=>`
-    <tr>
-    <td>${m.semester ?? "-"}</td>
-    <td>${m.totalMarks ?? "-"}</td>
-    <td class="${m.validated ? "status-approved":"status-pending"}">
-    ${m.validated ? "APPROVED":"PENDING"}
-    </td>
-    </tr>
-    `).join("");
-
-    document.getElementById("certTable").innerHTML =
-    data.certificates.map(c=>`
-    <tr>
-    <td>${c.title ?? "-"}</td>
-    <td class="${c.status==="APPROVED" ? "status-approved":"status-pending"}">
-    ${c.status ?? "PENDING"}
-    </td>
-    </tr>
-    `).join("");
-
+    function exportProfile(){
+        const element = document.getElementById('profileArea');
+        const opt = {
+            margin: 0.5,
+            filename: `Profile_${studentId}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, backgroundColor: '#0a0e27' }, // Keeping the theme in PDF
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
     }
 
     loadProfile();
-
-    function exportProfile(){
-
-    const element = document.body;
-
-    const opt = {
-    margin:0.5,
-    filename:'student-profile.pdf',
-    image:{type:'jpeg',quality:1},
-    html2canvas:{scale:2},
-    jsPDF:{unit:'in',format:'a4',orientation:'portrait'}
-    };
-
-    html2pdf().set(opt).from(element).save();
-
-    }
-
 </script>
 
 </body>

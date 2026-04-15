@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <title>Mentor Setup</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #eef2f7; padding: 30px; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.2); max-width: 500px; margin: auto; }
+        body { font-family: Arial, sans-serif; background: #0a0e27; padding: 30px;margin:0;min-height:100vh;position:relative;overflow-x:hidden }
+        body::before {content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(2px 2px at 20px 30px,#eee,rgba(0,0,0,0)),radial-gradient(2px 2px at 60px 70px,#fff,rgba(0,0,0,0)),radial-gradient(1px 1px at 50px 50px,#ddd,rgba(0,0,0,0)),radial-gradient(1px 1px at 130px 80px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 90px 10px,#eee,rgba(0,0,0,0));background-repeat:repeat;background-size:200px 200px;animation:twinkle 5s infinite;pointer-events:none;z-index:1}
+        @keyframes twinkle {0%,100%{opacity:0.5}50%{opacity:1}}
+        body > * {position:relative;z-index:2}
+        .container { background: #f8f9fc; padding: 30px; border-radius: 12px; box-shadow: 0 15px 50px rgba(0,0,0,0.3); max-width: 500px; margin: auto;border:1px solid rgba(102,126,234,0.2);animation:fadeInUp 0.6s ease; }
+        @keyframes fadeInUp {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         h2 { color: #333; margin-bottom: 20px; }
         input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; background: #2980b9; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #1f6391; }
+        button { padding: 10px 20px; background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 8px; cursor: pointer;font-weight:600;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(102,126,234,0.3) }
+        button:hover { background: linear-gradient(135deg,#667eea,#764ba2);transform:translateY(-2px);box-shadow:0 8px 25px rgba(102,126,234,0.4) }
     </style>
 </head>
 <body>

@@ -4,209 +4,818 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Student Dashboard</title>
+    <title>Student Profile</title>
 
     <style>
-        :root{
-          --bg:#f4f7fb;
-          --card:#ffffff;
-          --accent:#1976d2;
-          --muted:#6b7280;
-          --radius:10px;
+        :root {
+            --bg: #f4f7fb;
+            --card: #ffffff;
+            --accent: #1976d2;
+            --muted: #6b7280;
+            --radius: 10px;
         }
 
-        *{box-sizing:border-box}
-
-        body{
-          margin:0;
-          font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
-          background:var(--bg);
-          color:#0f172a;
+        * {
+            box-sizing: border-box
         }
 
-        .topbar{
-          height:64px;
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          padding:10px 20px;
-          background:white;
-          border-bottom:1px solid rgba(0,0,0,0.05);
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            background: #0a0e27;
+            color: #0f172a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .brand{
-          display:flex;
-          align-items:center;
-          gap:12px;
-          font-weight:700;
-          font-size:18px;
+        /* Starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 50px 50px, #ddd, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 90px 10px, #eee, rgba(0, 0, 0, 0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .logo{
-          width:40px;
-          height:40px;
-          border-radius:8px;
-          background:var(--accent);
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          color:white;
-          font-weight:700;
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
-        .container{
-          max-width:700px;
-          margin:40px auto;
-          padding:20px;
+        body>* {
+            position: relative;
+            z-index: 2;
         }
 
-        .card{
-          background:var(--card);
-          border-radius:var(--radius);
-          padding:30px;
-          box-shadow:0 10px 30px rgba(0,0,0,0.05);
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        h2{
-          margin-top:0;
-          margin-bottom:20px;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        form{
-          display:flex;
-          flex-direction:column;
-          gap:15px;
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
         }
 
-        label{
-          font-weight:600;
-          font-size:14px;
+        .topbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, rgba(10, 14, 39, 0.9), rgba(10, 14, 39, 0.7));
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            animation: slideDown 0.5s ease;
         }
 
-        input{
-          padding:10px;
-          border-radius:8px;
-          border:1px solid #ddd;
-          font-size:14px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #ffffff;
         }
 
-        input:focus{
-          outline:none;
-          border-color:var(--accent);
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            animation: float 3s ease-in-out infinite;
+            transition: all 0.3s ease;
         }
 
-        button{
-          margin-top:10px;
-          padding:12px;
-          border-radius:8px;
-          border:none;
-          background:var(--accent);
-          color:white;
-          font-weight:600;
-          cursor:pointer;
+        .logo:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
-        button:hover{
-          opacity:0.9;
+        .back-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-btn:hover {
+            background: #764ba2;
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: #f8f9fc;
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.3);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header-section h2 {
+            margin: 0;
+        }
+
+        .edit-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .activity-score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .activity-score-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .activity-score {
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .activity-score-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-value {
+            font-size: 16px;
+            color: #1a2a4a;
+            padding: 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .field-value.disabled {
+            background: #f5f5f5;
+            color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="date"],
+        textarea {
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        input:disabled {
+            background: #f5f5f5;
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .notification {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .notification.rejected {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .notification.approved {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .notification.rejected .notification-title {
+            color: #721c24;
+        }
+
+        .notification.approved .notification-title {
+            color: #155724;
+        }
+
+        .rejections-section {
+            margin-top: 30px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 30px;
+        }
+
+        .rejection-item {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .rejection-title {
+            font-weight: 700;
+            color: #721c24;
+            margin-bottom: 8px;
+        }
+
+        .rejection-note {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #856404;
+            border-left: 3px solid #ffc107;
+        }
+
+        .close-rejections-btn {
+            background: #dc3545;
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-rejections-btn:hover {
+            background: #bd2130;
+            transform: scale(1.1);
+        }
+
+        @media (max-width:600px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-score {
+                font-size: 48px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="topbar">
-    <div class="brand">
-        <div class="logo">S</div>
-        Student Dashboard
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo">P</div>
+            Student Profile
+        </div>
+
+        <button class="back-btn" onclick="history.back()">← Back</button>
     </div>
-</div>
 
-<div class="container">
-    <div class="card">
-        <h2>My Profile</h2>
+    <div class="container">
+        <div class="activity-score-card">
+            <div class="activity-score-label">Total Activity Points</div>
+            <div class="activity-score" id="totalActivityScore">0</div>
+            <div class="activity-score-subtitle">Approved Certificates</div>
+        </div>
 
-        <form id="profileForm">
+        <div id="rejectionNotification" class="notification rejected"></div>
 
-            <label>Name</label>
-            <input id="name">
+        <div class="card">
+            <div class="header-section">
+                <h2>Profile Information</h2>
+                <button class="edit-btn" id="editToggleBtn" onclick="toggleEditMode()">Edit Profile</button>
+            </div>
 
-            <label>Department</label>
-            <input id="department">
+            <div id="viewMode">
+                <div class="profile-grid">
+                    <div class="profile-field">
+                        <div class="field-label">Full Name</div>
+                        <div class="field-value" id="viewName">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">USN</div>
+                        <div class="field-value disabled" id="viewUsn">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">Email</div>
+                        <div class="field-value disabled" id="viewEmail">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">Department</div>
+                        <div class="field-value" id="viewDepartment">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">Date of Birth</div>
+                        <div class="field-value" id="viewDob">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">Academic Year</div>
+                        <div class="field-value" id="viewYear">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">Mentor Name</div>
+                        <div class="field-value disabled" id="viewMentorName">-</div>
+                    </div>
+                    <div class="profile-field">
+                        <div class="field-label">Mentor ID</div>
+                        <div class="field-value disabled" id="viewMentorId">-</div>
+                    </div>
+                </div>
+            </div>
 
-            <label>Academic Year</label>
-            <input id="academicYear" type="number">
+            <div id="editMode" class="hidden">
+                <form id="profileForm">
+                    <div class="profile-grid">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="editName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>USN (Read Only)</label>
+                            <input type="text" id="editUsn" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Email (Read Only)</label>
+                            <input type="email" id="editEmail" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" id="editDepartment" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="editDob" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Academic Year</label>
+                            <input type="number" id="editYear" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Mentor Name (Read Only)</label>
+                            <input type="text" id="editMentorName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Mentor ID (Read Only)</label>
+                            <input type="text" id="editMentorId" disabled>
+                        </div>
+                    </div>
 
-            <label>Date of Birth</label>
-            <input id="dob" type="date">
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                        <button type="button" class="btn-secondary" onclick="cancelEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-            <label>USN (readonly)</label>
-            <input id="usn" disabled>
-
-            <label>Mentor</label>
-            <input id="mentorName" disabled>
-
-            <label>Mentor</label>
-            <input id="mentorUsn" disabled>
-
-            <button type="submit">Update Profile</button>
-
-        </form>
+        <div id="rejectionsContainer" class="card rejections-section" style="display: none; margin-top: 30px; border: 2px solid #f8d7da; background: #f8f9fa;">
+            <h3 style="margin: 0 0 20px 0; color:#721c24;">⚠️ Certificate Rejections</h3>
+            <div id="rejectionsList"></div>
+        </div>
     </div>
-</div>
 
-<script>
+    <script>
+        let editMode = false;
 
-    async function loadProfile() {
-      const res = await fetch('/api/student/me', {
-        credentials: 'include'
-      });
+        function toggleEditMode() {
+            editMode = !editMode;
+            document.getElementById("viewMode").classList.toggle("hidden");
+            document.getElementById("editMode").classList.toggle("hidden");
+            document.getElementById("editToggleBtn").textContent = editMode ? "Cancel" : "Edit Profile";
 
-      if (!res.ok) {
-        alert("Unauthorized");
-        window.location = "index.html";
-        return;
-      }
+            if (editMode) {
+                document.getElementById("editName").focus();
+            }
+        }
 
-      const data = await res.json();
+        function cancelEdit() {
+            editMode = false;
+            document.getElementById("viewMode").classList.remove("hidden");
+            document.getElementById("editMode").classList.add("hidden");
+            document.getElementById("editToggleBtn").textContent = "Edit Profile";
+        }
 
-      document.getElementById("name").value = data.name || "";
-      document.getElementById("department").value = data.department || "";
-      document.getElementById("academicYear").value = data.academicYear || "";
-      document.getElementById("dob").value = data.dob || "";
-      document.getElementById("usn").value = data.usn || "";
-      document.getElementById("mentorName").value = data.mentorName || "";
-      document.getElementById("mentorUsn").value = data.mentorUsn || "";
-    }
+        async function loadProfile() {
+            const res = await fetch('/api/student/me', {
+                credentials: 'include'
+            });
 
-    document.getElementById("profileForm")
-      .addEventListener("submit", async (e) => {
+            if (!res.ok) {
+                alert("Unauthorized");
+                window.location = "index.html";
+                return;
+            }
 
-        e.preventDefault();
+            const data = await res.json();
 
-        const payload = {
-          name: document.getElementById("name").value.trim(),
-          department: document.getElementById("department").value.trim(),
-          academicYear: parseInt(document.getElementById("academicYear").value),
-          dob: document.getElementById("dob").value
-        };
+            document.getElementById("viewName").textContent = data.name || "-";
+            document.getElementById("viewUsn").textContent = data.usn || "-";
+            document.getElementById("viewEmail").textContent = data.email || "-";
+            document.getElementById("viewDepartment").textContent = data.department || "-";
+            document.getElementById("viewDob").textContent = formatDate(data.dob) || "-";
+            document.getElementById("viewYear").textContent = data.academicYear || "-";
+            document.getElementById("viewMentorName").textContent = data.mentorName || "-";
+            document.getElementById("viewMentorId").textContent = data.mentorId || "-";
 
-        const res = await fetch('/api/student/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload)
+            document.getElementById("editName").value = data.name || "";
+            document.getElementById("editUsn").value = data.usn || "";
+            document.getElementById("editEmail").value = data.email || "";
+            document.getElementById("editDepartment").value = data.department || "";
+            document.getElementById("editDob").value = data.dob || "";
+            document.getElementById("editYear").value = data.academicYear || "";
+            document.getElementById("editMentorName").value = data.mentorName || "";
+            document.getElementById("editMentorId").value = data.mentorId || "";
+
+            loadActivityPoints();
+            loadRejections();
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return "-";
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        async function loadActivityPoints() {
+            try {
+                const res = await fetch('/api/student/activity-points', {
+                    credentials: 'include'
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById("totalActivityScore").textContent = data.totalPoints || 0;
+                }
+            } catch (err) {
+                console.error("Error loading activity points:", err);
+            }
+        }
+
+        async function loadRejections() {
+            try {
+                console.log("📬 Loading rejected certificates from profile...");
+                const res = await fetch('/api/student/certificate-rejections', {
+                    credentials: 'include'
+                });
+
+                console.log("✓ API Response Status:", res.status);
+
+                if (res.ok) {
+                    const rejections = await res.json();
+                    console.log("✓ Rejections data:", rejections);
+                    
+                    if (rejections && rejections.length > 0) {
+                        console.log("🎯 Found " + rejections.length + " rejection(s) from API");
+                        displayRejections(rejections);
+                    } else {
+                        console.log("ℹ️ No rejections found");
+                        document.getElementById("rejectionsContainer").style.display = "none";
+                    }
+                } else {
+                    console.log("⚠️ API error:", res.status);
+                    document.getElementById("rejectionsContainer").style.display = "none";
+                }
+            } catch (err) {
+                console.error("❌ Error loading rejections:", err);
+            }
+        }
+
+        function displayRejections(rejections) {
+            console.log("📝 Displaying rejections...");
+            const container = document.getElementById("rejectionsContainer");
+            const list = document.getElementById("rejectionsList");
+            list.innerHTML = "";
+
+            // Get removed rejections from localStorage
+            const removedRejections = JSON.parse(localStorage.getItem("removedRejections") || "[]");
+            console.log("🗑️ Removed rejections from storage:", removedRejections);
+
+            // Filter out removed rejections
+            const visibleRejections = rejections.filter(rejection => {
+                const rejectionId = rejection.certificateType + "_" + rejection.rejectedDate;
+                return !removedRejections.includes(rejectionId);
+            });
+
+            if (!visibleRejections || visibleRejections.length === 0) {
+                console.log("ℹ️ No rejections to display (all removed or empty)");
+                container.style.display = "none";
+                return;
+            }
+
+            visibleRejections.forEach(rejection => {
+                const rejectionId = rejection.certificateType + "_" + rejection.rejectedDate;
+                const item = document.createElement("div");
+                item.className = "rejection-item";
+                item.id = "rejection-" + rejectionId;
+                item.style.display = "flex";
+                item.style.justifyContent = "space-between";
+                item.style.alignItems = "flex-start";
+                item.style.gap = "10px";
+                
+                const contentDiv = document.createElement("div");
+                contentDiv.style.flex = "1";
+                contentDiv.innerHTML = `
+                    <div class="rejection-title">❌ ${rejection.certificateType} - Rejected</div>
+                    <div>Rejected on: ${formatDate(rejection.rejectedDate)}</div>
+                    ${rejection.rejectionNote ? `<div class="rejection-note"><strong>Mentor's Note:</strong><br>${rejection.rejectionNote}</div>` : ""}
+                `;
+                
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "✕";
+                removeBtn.style.background = "#dc3545";
+                removeBtn.style.color = "white";
+                removeBtn.style.border = "none";
+                removeBtn.style.borderRadius = "4px";
+                removeBtn.style.padding = "5px 10px";
+                removeBtn.style.cursor = "pointer";
+                removeBtn.style.fontSize = "16px";
+                removeBtn.style.marginTop = "5px";
+                removeBtn.title = "Remove this rejection";
+                removeBtn.onclick = function() {
+                    removeRejection(rejectionId);
+                };
+                
+                item.appendChild(contentDiv);
+                item.appendChild(removeBtn);
+                list.appendChild(item);
+            });
+
+            console.log("✅ Rejections rendered in DOM (" + visibleRejections.length + " visible)");
+            console.log("📍 Showing rejections container");
+            container.style.display = "block";
+        }
+
+        function removeRejection(rejectionId) {
+            console.log("🔌 Removing rejection:", rejectionId);
+            
+            // Get current removed list
+            const removedRejections = JSON.parse(localStorage.getItem("removedRejections") || "[]");
+            
+            // Add this rejection to removed list
+            if (!removedRejections.includes(rejectionId)) {
+                removedRejections.push(rejectionId);
+                localStorage.setItem("removedRejections", JSON.stringify(removedRejections));
+                console.log("💾 Saved to localStorage:", removedRejections);
+            }
+            
+            // Remove from DOM with animation
+            const element = document.getElementById("rejection-" + rejectionId);
+            if (element) {
+                element.style.opacity = "0";
+                element.style.transition = "opacity 0.3s ease";
+                setTimeout(() => {
+                    element.remove();
+                    console.log("✅ Rejection removed from display");
+                    
+                    // Check if there are any rejections left
+                    const list = document.getElementById("rejectionsList");
+                    if (list.children.length === 0) {
+                        document.getElementById("rejectionsContainer").style.display = "none";
+                        console.log("📍 No more rejections - hiding container");
+                    }
+                }, 300);
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", function () {
+            console.log("📄 Profile page loaded");
+            loadProfile();
         });
 
-        if (res.ok) {
-          alert("Profile updated successfully!");
-        } else {
-          alert(await res.text());
-        }
-    });
+        document.getElementById("profileForm")
+            .addEventListener("submit", async (e) => {
+                e.preventDefault();
 
-    loadProfile();
+                const payload = {
+                    name: document.getElementById("editName").value.trim(),
+                    department: document.getElementById("editDepartment").value.trim(),
+                    academicYear: parseInt(document.getElementById("editYear").value),
+                    dob: document.getElementById("editDob").value
+                };
 
-</script>
+                const res = await fetch('/api/student/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Profile updated successfully!");
+                    cancelEdit();
+                    loadProfile();
+                } else {
+                    alert(await res.text());
+                }
+            });
+
+        loadProfile();
+    </script>
 
 </body>
+
 </html>

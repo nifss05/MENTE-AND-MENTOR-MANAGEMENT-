@@ -45,13 +45,29 @@
           color:#6b7280;
           font-size:14px;
         }
+
+        .back-btn {
+          display: inline-block;
+          margin-bottom: 20px;
+          padding: 10px 16px;
+          background: #6b7280;
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .back-btn:hover {
+          background: #4b5563;
+        }
     </style>
 </head>
 
 <body>
 
 <div class="container">
-
+    <button class="back-btn" onclick="history.back()">← Back</button>
     <h2>Mentor Dashboard</h2>
 
     <div id="stats" class="grid">

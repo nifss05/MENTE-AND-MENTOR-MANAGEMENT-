@@ -13,8 +13,8 @@ public class Marks {
     @Column(nullable = false)
     private String studentUsn;
 
-    @Column(name = "mentor_usn")
-    private String mentorUsn;
+    @Column(name = "mentor_id")
+    private String mentorId;
     private Integer semester;
 
     private String subject;
@@ -54,7 +54,6 @@ public class Marks {
         this.subject = subject;
     }
 
-
     public Integer getTotalMarks() {
         return totalMarks;
     }
@@ -78,8 +77,6 @@ public class Marks {
     public void setSemester(Integer semester) {
         this.semester = semester;
     }
-
-
 
     public Integer getMse1() {
         return mse1;
@@ -113,8 +110,6 @@ public class Marks {
         this.see = see;
     }
 
-
-
     public String getGrade() {
         return grade;
     }
@@ -131,15 +126,13 @@ public class Marks {
         this.activityPoints = activityPoints;
     }
 
-    public String getMentorUsn() {
-        return mentorUsn;
+    public String getMentorId() {
+        return mentorId;
     }
 
     // Setter
-    public void setMentorUsn(String mentorUsn) {
-        this.mentorUsn = mentorUsn;
+    public void setMentorId(String mentorId) {
+        this.mentorId = mentorId;
     }
-
-
 
 }

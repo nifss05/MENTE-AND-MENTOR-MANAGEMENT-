@@ -13,10 +13,10 @@ public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
-    public void sendMessage(String mentorUsn, String studentUsn, String messageText) {
+    public void sendMessage(String mentorId, String studentUsn, String messageText) {
 
         Message message = new Message();
-        message.setMentorUsn(mentorUsn);
+        message.setMentorId(mentorId);
         message.setStudentUsn(studentUsn);
         message.setMessage(messageText);
         message.setRead(false);

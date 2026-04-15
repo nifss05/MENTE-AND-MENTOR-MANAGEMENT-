@@ -12,7 +12,6 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long studentId;
 
-
     @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
 
@@ -26,8 +25,8 @@ public class Student {
     @Column(name = "academic_year")
     private Integer academicYear;
 
-    @Column(name = "mentor_usn")
-    private String mentorUsn;
+    @Column(name = "mentor_id")
+    private String mentorId;
 
     @Column(name = "mentor_name")
     private String mentorName;
@@ -83,12 +82,12 @@ public class Student {
         this.academicYear = academicYear;
     }
 
-    public String getMentorUsn() {
-        return mentorUsn;
+    public String getMentorId() {
+        return mentorId;
     }
 
-    public void setMentorUsn(String mentorUsn) {
-        this.mentorUsn = mentorUsn;
+    public void setMentorId(String mentorId) {
+        this.mentorId = mentorId;
     }
 
     public String getMentorName() {

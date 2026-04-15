@@ -1,4 +1,5 @@
 package org.example.controller;
+
 import jakarta.annotation.Resource;
 import org.example.dto.MentorPendingResponse;
 import org.example.dto.SubjectMarks;
@@ -65,25 +66,21 @@ public class MentorController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        List<Certificate> certs =
-                certificateRepository.findByMentorUsnAndStatus(
-                        mentor.getUsn(),
-                        CertificateStatus.PENDING
-                );
+        List<Certificate> certs = certificateRepository.findByMentorIdAndStatus(
+                mentor.getUsn(),
+                CertificateStatus.PENDING);
 
-        List<Marks> marks =
-                marksRepository.findByValidatedFalseAndMentorUsn(
-                        mentor.getUsn()
-                );
+        List<Marks> marks = marksRepository.findByValidatedFalseAndMentorId(
+                mentor.getUsn());
 
         System.out.println("Mentor USN: " + mentor.getUsn());
         System.out.println("Certificates: " + certs.size());
         System.out.println("Marks: " + marks.size());
         return ResponseEntity.ok(
-                new MentorPendingResponse(certs, marks)
-        );
+                new MentorPendingResponse(certs, marks));
 
     }
+
     @GetMapping("/me")
     public ResponseEntity<?> getMentor(HttpSession session) {
 
@@ -95,6 +92,7 @@ public class MentorController {
 
         return ResponseEntity.ok(user);
     }
+
     @GetMapping("/mentees")
     public ResponseEntity<?> getMentees(HttpSession session) {
 
@@ -115,11 +113,11 @@ public class MentorController {
                     .body("Mentor USN missing");
         }
 
-        List<Student> students =
-                studentRepository.findByMentorUsn(user.getUsn());
+        List<Student> students = studentRepository.findByMentorId(user.getUsn());
 
         return ResponseEntity.ok(students);
     }
+
     @GetMapping("/students")
     public ResponseEntity<?> getFilteredStudents(
             @RequestParam(required = false) Integer academicYear,
@@ -133,16 +131,17 @@ public class MentorController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        List<Student> students = studentRepository.findByMentorUsn(mentor.getUsn());
+        List<Student> students = studentRepository.findByMentorId(mentor.getUsn());
 
-        List<Map<String,Object>> result = students.stream()
+        List<Map<String, Object>> result = students.stream()
 
                 .filter(s -> academicYear == null || academicYear.equals(s.getAcademicYear()))
-                .filter(s -> department == null || department.isEmpty() || department.equalsIgnoreCase(s.getDepartment()))
+                .filter(s -> department == null || department.isEmpty()
+                        || department.equalsIgnoreCase(s.getDepartment()))
 
                 .map(s -> {
 
-                    Map<String,Object> map = new HashMap<>();
+                    Map<String, Object> map = new HashMap<>();
 
                     map.put("name", s.getName());
                     map.put("usn", s.getUsn());
@@ -155,9 +154,9 @@ public class MentorController {
 
                     String computedStatus;
 
-                    if(hasMarks || hasCerts){
+                    if (hasMarks || hasCerts) {
                         computedStatus = "APPROVED";
-                    }else{
+                    } else {
                         computedStatus = "PENDING";
                     }
 
@@ -167,18 +166,19 @@ public class MentorController {
 
                 })
 
-                .filter(m -> status == null || status.isEmpty() || status.equalsIgnoreCase((String)m.get("status")))
+                .filter(m -> status == null || status.isEmpty() || status.equalsIgnoreCase((String) m.get("status")))
 
                 .toList();
 
         return ResponseEntity.ok(result);
     }
+
     @GetMapping("/certificate/download")
     public ResponseEntity<Resource> downloadCertificate(@RequestParam String path) throws Exception {
 
         File file = new File(path);
 
-        if(!file.exists()){
+        if (!file.exists()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -189,6 +189,7 @@ public class MentorController {
                         "attachment; filename=" + file.getName())
                 .body((Resource) resource);
     }
+
     @GetMapping("/student/{id}")
     public Map<String, Object> getStudentProfile(@PathVariable Long id, HttpSession session) {
 
@@ -203,7 +204,6 @@ public class MentorController {
 
         String usn = student.getUsn();
 
-
         List<Marks> marks = marksRepository.findByStudentUsn(usn);
 
         List<Certificate> certs = certificateRepository.findByStudentUsn(usn);
@@ -216,6 +216,7 @@ public class MentorController {
 
         return response;
     }
+
     @GetMapping("/monitor")
     public ResponseEntity<?> monitorStats(HttpSession session) {
 
@@ -225,33 +226,29 @@ public class MentorController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        String mentorUsn = mentor.getUsn();
+        String mentorId = mentor.getUsn();
 
-        List<Student> students = studentRepository.findByMentorUsn(mentorUsn);
+        List<Student> students = studentRepository.findByMentorId(mentorId);
 
         int totalStudents = students.size();
 
         int setupCompleted = 0;
 
-        for(Student s : students){
-            if(s.getDob()!=null && s.getDepartment()!=null){
+        for (Student s : students) {
+            if (s.getDob() != null && s.getDepartment() != null) {
                 setupCompleted++;
             }
         }
 
         int setupPending = totalStudents - setupCompleted;
 
-        int pendingCertificates =
-                certificateRepository.findByMentorUsnAndStatus(
-                        mentorUsn,"PENDING"
-                ).size();
+        int pendingCertificates = certificateRepository.findByMentorIdAndStatus(
+                mentorId, "PENDING").size();
 
-        int pendingMarks =
-                marksRepository.findByValidatedFalseAndMentorUsn(
-                        mentorUsn
-                ).size();
+        int pendingMarks = marksRepository.findByValidatedFalseAndMentorId(
+                mentorId).size();
 
-        Map<String,Object> stats = new HashMap<>();
+        Map<String, Object> stats = new HashMap<>();
 
         stats.put("totalStudents", totalStudents);
         stats.put("setupCompleted", setupCompleted);
@@ -263,12 +260,12 @@ public class MentorController {
     }
 
     @GetMapping("/analytics")
-    public Map<String,Object> getAnalytics(
-            @RequestParam(required=false) Integer year,
-            @RequestParam(required=false) Integer semester,
-            HttpSession session){
+    public Map<String, Object> getAnalytics(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer semester,
+            HttpSession session) {
         User mentor = (User) session.getAttribute("user");
-        Map<String,Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
 
         // ============================
         // SUBJECT AVERAGES
@@ -284,7 +281,7 @@ public class MentorController {
         List<String> subjects = new ArrayList<>();
         List<Double> averages = new ArrayList<>();
 
-        for(SubjectMarks row : subjectData){
+        for (SubjectMarks row : subjectData) {
             subjects.add(row.getName());
             averages.add(row.getTotal().doubleValue());
         }
@@ -323,7 +320,7 @@ public class MentorController {
 
     @PostMapping("/setup")
     public ResponseEntity<?> setupProfile(@RequestBody User updatedUser,
-                                          HttpSession session) {
+            HttpSession session) {
 
         User mentor = (User) session.getAttribute("user");
 
@@ -348,6 +345,7 @@ public class MentorController {
 
         return ResponseEntity.ok("Profile updated");
     }
+
     @PostMapping("/marks/{id}/approve")
     public ResponseEntity<?> approveMarks(@PathVariable Long id, HttpSession session) {
 
@@ -366,6 +364,7 @@ public class MentorController {
 
         return ResponseEntity.ok("Marks approved");
     }
+
     @PostMapping("/marks/{id}/reject")
     public ResponseEntity<?> rejectMarks(@PathVariable Long id, HttpSession session) {
 
@@ -379,6 +378,7 @@ public class MentorController {
 
         return ResponseEntity.ok("Marks rejected");
     }
+
     @PostMapping("/certificate/{id}/approve")
     public ResponseEntity<?> approveCertificate(@PathVariable Long id, HttpSession session) {
 
@@ -397,8 +397,11 @@ public class MentorController {
 
         return ResponseEntity.ok("Certificate approved");
     }
+
     @PostMapping("/certificate/{id}/reject")
-    public ResponseEntity<?> rejectCertificate(@PathVariable Long id, HttpSession session) {
+    public ResponseEntity<?> rejectCertificate(@PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body,
+            HttpSession session) {
 
         User mentor = (User) session.getAttribute("user");
 
@@ -406,10 +409,19 @@ public class MentorController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        certificateRepository.deleteById(id);
+        Certificate cert = certificateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Certificate not found"));
+
+        cert.setStatus(CertificateStatus.REJECTED);
+        cert.setRejectedDate(java.time.LocalDateTime.now());
+
+        if (body != null && body.containsKey("rejectionNote")) {
+            cert.setRejectionNote(body.get("rejectionNote"));
+        }
+
+        certificateRepository.save(cert);
 
         return ResponseEntity.ok("Certificate rejected");
     }
 
 }
-

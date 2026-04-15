@@ -9,7 +9,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     List<Message> findByStudentUsnOrderByCreatedAtDesc(String studentUsn);
 
-    List<Message> findByMentorUsnOrderByCreatedAtDesc(String mentorUsn);
+    List<Message> findByMentorIdOrderByCreatedAtDesc(String mentorId);
 
     List<Message> findByStudentUsnAndReadFalse(String studentUsn);
 }

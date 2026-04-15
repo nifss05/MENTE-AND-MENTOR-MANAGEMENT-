@@ -6,456 +6,794 @@
     <title>Student Dashboard</title>
 
     <style>
-
-        :root{
-        --bg:#f4f7fb;
-        --card:#ffffff;
-        --accent:#1976d2;
-        --muted:#6b7280;
-        --radius:10px;
+        :root {
+            --bg: #0a0e27;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-hover: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --radius: 12px;
         }
 
-        *{box-sizing:border-box}
+        * { box-sizing: border-box; }
 
-        body{
-        margin:0;
-        font-family:Inter,"Segoe UI",Roboto,Arial;
-        background:var(--bg);
-        color:#0f172a;
+        body {
+            margin: 0;
+            font-family: 'Inter', "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            line-height: 1.5;
         }
+
+        /* Hide scrollbar */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 50px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 10px, #eee, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes twinkle { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+
+        body > * { position: relative; z-index: 2; }
 
         /* TOPBAR */
-
-        .topbar{
-        height:64px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding:10px 20px;
-        background:linear-gradient(90deg,var(--card),transparent);
-        border-bottom:1px solid rgba(15,23,42,0.04);
+        .topbar {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            background: rgba(10, 14, 39, 0.8);
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
         }
 
-        .brand{display:flex;align-items:center;gap:12px}
+        .brand { display: flex; align-items: center; gap: 12px; color: #fff; }
 
-        .logo{
-        width:44px;height:44px;border-radius:8px;
-        background:var(--accent);
-        display:flex;align-items:center;justify-content:center;
-        color:white;font-weight:700;
-        cursor:pointer;
+        .logo {
+            width: 42px; height: 42px; border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
+
+        .logo:hover { transform: scale(1.05) rotate(5deg); }
 
         /* MESSAGE DROPDOWN */
+        .messages-box { position: relative; }
+        .msg-btn { background: none; border: none; font-size: 20px; cursor: pointer; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
 
-        .messages-box{
-        position:relative;
+        #messagePanel {
+            position: absolute;
+            right: 0; top: 50px;
+            width: 320px;
+            background: #161b33;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            padding: 16px;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+            z-index: 1000;
+            pointer-events: auto;
         }
 
-        .msg-btn{
-        background:none;
-        border:none;
-        font-size:20px;
-        cursor:pointer;
+        .message { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 12px 0; transition: all 0.3s ease; }
+        .message p { margin: 0; font-size: 14px; color: #e2e8f0; }
+        .message small { color: var(--text-dim); font-size: 11px; }
+        
+        .mark-read-btn {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            pointer-events: auto;
         }
-
-        #messagePanel{
-        position:absolute;
-        right:0;
-        top:40px;
-        width:300px;
-        background:white;
-        border-radius:10px;
-        box-shadow:0 10px 25px rgba(0,0,0,0.15);
-        padding:12px;
-        display:none;
-        max-height:320px;
-        overflow-y:auto;
-        z-index:100;
+        
+        .mark-read-btn:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
-
-        .message{
-        border-bottom:1px solid #eee;
-        padding:8px 0;
-        }
-
-        .message:last-child{
-        border:none;
-        }
-
-        .message p{
-        margin:0;
-        font-size:14px;
-        }
-
-        .message small{
-        color:var(--muted);
-        font-size:11px;
-        }
-
-        .message button{
-        margin-top:5px;
-        border:none;
-        background:var(--accent);
-        color:white;
-        padding:4px 8px;
-        border-radius:6px;
-        cursor:pointer;
-        font-size:11px;
+        
+        .mark-read-btn:active {
+            transform: translateY(0);
         }
 
         /* HEADER */
-
-        .header{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        max-width:1100px;
-        margin:20px auto;
-        padding:0 20px;
+        .header {
+            max-width: 1100px;
+            margin: 40px auto 10px;
+            padding: 0 20px;
         }
 
-        .avatar{
-        width:56px;
-        height:56px;
-        border-radius:12px;
-        background:#e6f0fb;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:#1976d2;
-        font-weight:700;
-        font-size:18px;
+        .avatar {
+            width: 60px; height: 60px; border-radius: 14px;
+            background: linear-gradient(45deg, #4f46e5, #ec4899);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 22px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        .muted{
-        color:#6b7280;
-        font-size:13px;
-        }
+        .muted { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
 
         /* CONTAINER */
-
-        .container{
-        max-width:1100px;
-        margin:18px auto;
-        padding:20px;
-        display:flex;
-        flex-direction:column;
-        gap:24px;
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
         }
 
-        .grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-        gap:16px;
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
-        .card{
-        background:var(--card);
-        border-radius:var(--radius);
-        padding:18px;
-        box-shadow:0 8px 28px rgba(11,20,40,0.06);
-        display:flex;
-        flex-direction:column;
-        gap:10px;
+        .card {
+            background: var(--glass);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .title{font-size:16px;font-weight:700}
-        .desc{color:var(--muted);font-size:13px}
-
-        .actions{
-        display:flex;
-        gap:10px;
-        margin-top:8px;
+        .card:hover {
+            transform: translateY(-5px);
+            background: var(--glass-hover);
+            border-color: var(--accent);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
-        .link{
-        text-decoration:none;
-        color:var(--accent);
-        font-weight:700;
-        padding:8px;
-        border-radius:8px;
-        border:1px solid rgba(25,118,210,0.1);
+        .title { font-size: 18px; font-weight: 700; color: #fff; }
+        .desc { color: var(--text-dim); font-size: 14px; line-height: 1.4; }
+
+        .link {
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: var(--accent);
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .link:hover {
+            background: #4f46e5;
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
         /* STUDENT TOOLS */
-
-        .tools{
-        display:flex;
-        flex-wrap:wrap;
-        gap:14px;
+        .tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 5px;
         }
 
-        .tool{
-        display:flex;
-        align-items:center;
-        gap:8px;
-        background:white;
-        padding:8px 12px;
-        border-radius:8px;
-        text-decoration:none;
-        color:#0f172a;
-        font-size:13px;
-        border:1px solid rgba(0,0,0,0.05);
-        box-shadow:0 3px 10px rgba(0,0,0,0.05);
+        .tool {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--glass-border);
+            transition: 0.2s;
         }
 
-        .tool img{
-        width:18px;
-        height:18px;
+        .tool:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.03);
+            border-color: var(--accent);
         }
 
+        .tool img {
+            width: 18px; height: 18px;
+            filter: brightness(0) invert(1); /* Makes black icons white to fit the theme */
+        }
+
+        /* NOTIFICATION POPUP */
+        .notification-popup {
+            position: fixed;
+            top: 25px; right: 25px;
+            background: #1e1b4b;
+            color: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            max-width: 360px;
+            min-width: 280px;
+            z-index: 99999;
+            border-left: 5px solid var(--accent);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: auto;
+            visibility: hidden;
+            display: none;
+        }
+
+        /* NEW: Show class for displaying notification */
+        .notification-popup.show {
+            opacity: 1;
+            transform: translateX(0);
+            visibility: visible;
+            display: block !important;
+        }
+
+        .notification-popup[style*="display: block"] {
+            opacity: 1;
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        .notification-popup.success { border-left-color: #22c55e; }
+        .notification-popup.rejected { border-left-color: #ef4444; }
+
+        .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 800; }
+        .notification-close { background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; transition: all 0.2s ease; }
+        .notification-close:hover { background: rgba(255,255,255,0.2); }
+
+        .notification-note {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
     </style>
 </head>
 
 <body>
 
+<div id="notificationPopup" class="notification-popup" style="display:none;">
+    <div class="notification-header">
+        <span id="notifTitle">Certificate Approved</span>
+        <button class="notification-close" onclick="closeNotification()">✕</button>
+    </div>
+    <div class="notification-content" id="notifContent">
+        Your certificate has been reviewed.
+    </div>
+    <div class="notification-note" id="notifNote" style="display:none;"></div>
+</div>
+
 <div class="topbar">
-
     <div class="brand">
-
         <div class="logo" onclick="window.location='student_profile.html'">ST</div>
-
         <div>
-            <div class="title">Student Portal</div>
-            <div style="font-size:12px;color:#6b7280">Manage Your Academic Data</div>
+            <div class="title" style="font-size:16px; margin:0;">Student Portal</div>
+            <div style="font-size:11px; color:var(--text-dim)">Manage Your Academic Data</div>
         </div>
-
     </div>
 
-    <div style="display:flex;align-items:center;gap:16px">
-
+    <div style="display:flex;align-items:center;gap:20px">
         <div class="messages-box">
-
             <button class="msg-btn" onclick="toggleMessages()">🔔</button>
-
             <div id="messagePanel">
                 <div id="messagesList">Loading...</div>
             </div>
-
         </div>
-
-        <div id="studentName" style="color:#6b7280">Loading...</div>
-
-        <button onclick="logout()" style="padding:8px 12px;border-radius:8px;border:0;background:#ef4444;color:white;cursor:pointer">
+        <div id="studentName" style="color:var(--text-dim); font-size:14px; font-weight:500;">Loading...</div>
+        <button onclick="logout()" style="padding:8px 16px;border-radius:10px;border:0;background:rgba(239, 68, 68, 0.2);color:#f87171;cursor:pointer;font-weight:600;border:1px solid rgba(239, 68, 68, 0.2)">
             Logout
         </button>
-
     </div>
-
 </div>
-
 
 <div class="header">
-
-    <div style="display:flex;gap:12px;align-items:center">
-
+    <div style="display:flex;gap:18px;align-items:center">
         <div class="avatar" id="studentShort">--</div>
-
         <div>
-            <div id="studentFullName" style="font-weight:700">Loading...</div>
+            <div id="studentFullName" style="font-weight:800; font-size:22px;">Loading...</div>
             <div class="muted" id="studentMeta">Loading...</div>
         </div>
-
     </div>
-
 </div>
 
-
 <div class="container">
-
     <div class="grid">
-
         <div class="card">
             <div class="title">Profile</div>
-            <div class="desc">View & edit your personal details</div>
-            <div class="actions">
-                <a class="link" href="student_profile.html">Open</a>
-            </div>
+            <div class="desc">View & edit your personal details and academic credentials.</div>
+            <a class="link" href="student_profile.html">Open Profile</a>
         </div>
 
         <div class="card">
             <div class="title">Marks & Grades</div>
-            <div class="desc">Add / View semester-wise marks</div>
-            <div class="actions">
-                <a class="link" href="student_marks.html">Open</a>
-            </div>
+            <div class="desc">Track your semester-wise performance and CGPA results.</div>
+            <a class="link" href="student_marks.html">View Grades</a>
         </div>
 
         <div class="card">
             <div class="title">Activity Points</div>
-            <div class="desc">Upload certificates for activity points</div>
-            <div class="actions">
-                <a class="link" href="student_certificates.html">Upload</a>
-            </div>
+            <div class="desc">Upload certificates for mandatory student activity points.</div>
+            <a class="link" href="student_certificates.html">Upload Now</a>
         </div>
 
         <div class="card">
             <div class="title">Achievements</div>
-            <div class="desc">Hackathons, sports & accomplishments</div>
-            <div class="actions">
-                <a class="link" href="student_achievements.html">Open</a>
-            </div>
+            <div class="desc">Showcase your hackathons, sports, and other accomplishments.</div>
+            <a class="link" href="student_achievements.html">Open Portfolio</a>
         </div>
-
     </div>
-
 
     <div class="card">
-
         <div class="title">Student Tools</div>
-        <div class="desc">Helpful academic & career resources</div>
-
+        <div class="desc" style="margin-bottom:15px;">Helpful academic & career resources for tech students.</div>
         <div class="tools">
-
             <a class="tool" href="https://www.calculator.net/gpa-calculator.html" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/calculator.png"/>
-                GPA Calculator
+                <img src="https://img.icons8.com/ios-filled/50/calculator.png"/> GPA Calc
             </a>
-
             <a class="tool" href="https://chat.openai.com" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/chatgpt.png"/>
-                ChatGPT
+                <img src="https://img.icons8.com/ios-filled/50/chatgpt.png"/> ChatGPT
             </a>
-
             <a class="tool" href="https://resumake.io" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/resume.png"/>
-                Resume Builder
+                <img src="https://img.icons8.com/ios-filled/50/resume.png"/> Resumake
             </a>
-
             <a class="tool" href="https://github.com" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/github.png"/>
-                GitHub
+                <img src="https://img.icons8.com/ios-filled/50/github.png"/> GitHub
             </a>
-
             <a class="tool" href="https://leetcode.com" target="_blank">
-                <img src="https://img.icons8.com/external-tal-revivo-filled-tal-revivo/24/external-level-up-your-coding-skills-and-quickly-land-a-job-logo-filled-tal-revivo.png"/>
-                LeetCode
+                <img src="https://img.icons8.com/ios-filled/50/code.png"/> LeetCode
             </a>
-
-            <a class="tool" href="https://scholar.google.com" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/google-scholar.png"/>
-                Scholar
-            </a>
-
             <a class="tool" href="https://roadmap.sh" target="_blank">
-                <img src="https://img.icons8.com/ios-filled/50/road.png"/>
-                Tech Roadmaps
+                <img src="https://img.icons8.com/ios-filled/50/road.png"/> Roadmaps
             </a>
-
         </div>
     </div>
-
 </div>
 
-
 <script>
-
     let messagesLoaded=false;
 
     async function toggleMessages(){
-
-    const panel=document.getElementById("messagePanel");
-
-    if(panel.style.display==="none" || panel.style.display===""){
-
-    panel.style.display="block";
-
-    if(!messagesLoaded){
-    loadMessages();
-    messagesLoaded=true;
-    }
-
-    }else{
-    panel.style.display="none";
-    }
-
+        const panel=document.getElementById("messagePanel");
+        if(panel.style.display==="none" || panel.style.display===""){
+            panel.style.display="block";
+            if(!messagesLoaded){ loadMessages(); messagesLoaded=true; }
+        } else {
+            panel.style.display="none";
+        }
     }
 
     async function loadMessages(){
-
-    const res=await fetch("/api/messages/student",{credentials:"include"});
-
-    const data=await res.json();
-
-    const list=document.getElementById("messagesList");
-
-    list.innerHTML="";
-
-    data.forEach(m=>{
-
-    const div=document.createElement("div");
-    div.className="message";
-
-    div.innerHTML=`
-    <p>${m.message}</p>
-    <small>${m.createdAt}</small>
-    ${!m.isRead ? `<br><button onclick="markRead(${m.id},this)">Mark Read</button>` : ""}
-    `;
-
-    list.appendChild(div);
-
-    });
-
+        const res=await fetch("/api/messages/student",{credentials:"include"});
+        const data=await res.json();
+        const list=document.getElementById("messagesList");
+        const readMessages=JSON.parse(localStorage.getItem("readMessages")) || [];
+        list.innerHTML="";
+        
+        if(!data || data.length === 0) {
+            list.innerHTML = "<p style='color: #a0aec0; text-align: center;'>No unread messages</p>";
+            return;
+        }
+        
+        data.forEach(m=>{
+            if(readMessages.includes(m.id)) return;
+            const div=document.createElement("div");
+            div.className="message";
+            div.id=`msg-${m.id}`;
+            
+            const messageText = document.createElement("p");
+            messageText.textContent = m.message;
+            
+            const timeText = document.createElement("small");
+            timeText.textContent = m.createdAt;
+            
+            div.appendChild(messageText);
+            div.appendChild(timeText);
+            
+            if(!m.isRead) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "mark-read-btn";
+                btn.textContent = "Mark Read";
+                btn.setAttribute("data-id", m.id);
+                btn.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    markRead(m.id);
+                });
+                
+                const br = document.createElement("br");
+                div.appendChild(br);
+                div.appendChild(btn);
+            }
+            
+            list.appendChild(div);
+        });
     }
 
-    async function markRead(id,btn){
-
-    await fetch(`/api/messages/${id}/read`,{
-    method:"POST",
-    credentials:"include"
-    });
-
-    btn.parentElement.remove();
-
+    async function markRead(id){
+        console.log("Marking message as read:", id);
+        const messageDiv=document.getElementById(`msg-${id}`);
+        
+        try {
+            const res = await fetch(`/api/messages/${id}/read`, { 
+                method:"POST", 
+                credentials:"include",
+                headers: {'Content-Type': 'application/json'}
+            });
+            
+            if(!res.ok){
+                console.error("Failed to mark message as read:", res.status);
+            }
+        } catch(err) {
+            console.error("Error marking message as read:", err);
+        }
+        
+        // Remove message from UI regardless of API success
+        if(messageDiv) {
+            messageDiv.style.opacity = "0";
+            messageDiv.style.transform = "translateX(20px)";
+            setTimeout(() => {
+                if(messageDiv && messageDiv.parentElement) messageDiv.remove();
+            }, 300);
+        }
+        
+        // Store in localStorage
+        const readMessages=JSON.parse(localStorage.getItem("readMessages")) || [];
+        if(!readMessages.includes(id)) readMessages.push(id);
+        localStorage.setItem("readMessages",JSON.stringify(readMessages));
+        
+        console.log("Message removed and stored in localStorage");
     }
-
-    /* PROFILE LOAD */
 
     async function checkProfile(){
-
-    const res=await fetch('/api/student/me',{credentials:'include'});
-
-    if(res.status===401){
-    window.location="index.html";
-    return;
+        const res=await fetch('/api/student/me',{credentials:'include'});
+        if(res.status===401){ window.location="index.html"; return; }
+        if(res.status===404){ window.location="student_setup.html"; return; }
+        const student=await res.json();
+        let name = localStorage.getItem("studentName") || student.name || student.username || "Student";
+        const initials=name.split(" ").map(w=>w[0]).join("").substring(0,2).toUpperCase();
+        document.getElementById("studentShort").textContent=initials;
+        document.getElementById("studentFullName").textContent=name;
+        const department = localStorage.getItem("studentDepartment") || student.department || "N/A";
+        const year = localStorage.getItem("studentYear") || student.academicYear || "N/A";
+        document.getElementById("studentMeta").textContent= `Email: ${student.email||"N/A"} • USN: ${student.usn||"N/A"} • Dept: ${department} • Yr: ${year}`;
+        document.getElementById("studentName").textContent=name;
+        return Promise.resolve();
     }
 
-    if(res.status===404){
-    window.location="student_setup.html";
-    return;
+    checkProfile().then(() => {
+        localStorage.removeItem("studentName");
+        localStorage.removeItem("studentDepartment");
+        localStorage.removeItem("studentYear");
+        loadCertificateNotifications();
+    }).catch(err => console.error(err));
+
+    async function loadCertificateNotifications() {
+        try {
+            console.log("\n");
+            console.log("═══════════════════════════════════════════════════════");
+            console.log("📬 ===== LOADING CERTIFICATE NOTIFICATIONS =====");
+            console.log("═══════════════════════════════════════════════════════");
+            
+            // Get list of notifications user has dismissed
+            const dismissedCerts = JSON.parse(localStorage.getItem("dismissedNotifications")) || [];
+            console.log("📋 Dismissed notifications from localStorage:", dismissedCerts);
+            
+            let notificationShown = false;
+            let shownCertId = null;
+            
+            // Test if notification system works (remove this after testing)
+            // showNotification("🧪 Test", "Notification system is working!", "success");
+            
+            try {
+                const approvedRes = await fetch('/api/student/certificates?status=APPROVED', { 
+                    credentials: 'include',
+                    headers: {'Accept': 'application/json'}
+                });
+                console.log("\n✓ Approved API Response Status:", approvedRes.status);
+                
+                if (approvedRes.ok) {
+                    const approved = await approvedRes.json();
+                    console.log("✓ Approved certificates returned:", approved);
+                    
+                    if (approved && Array.isArray(approved) && approved.length > 0) {
+                        const latest = approved[0];
+                        console.log("✓ Latest approved cert object:", latest);
+                        console.log("  - certificateId:", latest.certificateId);
+                        console.log("  - id:", latest.id);
+                        console.log("  - certificateType:", latest.certificateType);
+                        
+                        const certKey = `approved_${latest.certificateId || latest.id}`;
+                        console.log("✓ Generated cert key:", certKey);
+                        console.log("  - Is in dismissed list?", dismissedCerts.includes(certKey));
+                        
+                        // Check if already dismissed
+                        if (dismissedCerts.includes(certKey)) {
+                            console.log("⏭️ SKIPPING: Approved cert already dismissed");
+                        } else {
+                            console.log("🎯 SHOWING: Approved notification (NOT in dismissed list)");
+                            showNotification(
+                                `✅ Approved!`, 
+                                `Your ${latest.certificateType} certificate earned ${latest.activityPoints || 0} points!`, 
+                                'success', 
+                                latest
+                            );
+                            shownCertId = certKey;
+                            notificationShown = true;
+                        }
+                    } else {
+                        console.log("ℹ️ No approved certificates found in array");
+                    }
+                } else {
+                    console.log("⚠️ Approved API error:", approvedRes.status, approvedRes.statusText);
+                }
+            } catch (e) {
+                console.error("❌ Error fetching approved certificates:", e);
+            }
+            
+            // Check rejected only if no approved notification
+            if (!notificationShown) {
+                console.log("\n✓ No approved notification shown, checking rejected...");
+                
+                try {
+                    const rejectedRes = await fetch('/api/student/certificate-rejections', { 
+                        credentials: 'include',
+                        headers: {'Accept': 'application/json'}
+                    });
+                    console.log("✓ Rejected API Response Status:", rejectedRes.status);
+                    
+                    if (rejectedRes.ok) {
+                        const rejected = await rejectedRes.json();
+                        console.log("✓ Rejected certificates returned:", rejected);
+                        
+                        if (rejected && Array.isArray(rejected) && rejected.length > 0) {
+                            const latest = rejected[0];
+                            console.log("✓ Latest rejected cert object:", latest);
+                            console.log("  - certificateId:", latest.certificateId);
+                            console.log("  - id:", latest.id);
+                            console.log("  - certificateType:", latest.certificateType);
+                            
+                            const rejectionId = `rejected_${latest.certificateType}_${latest.rejectedDate || latest.id}`;
+                            console.log("✓ Generated rejection key:", rejectionId);
+                            console.log("  - Is in dismissed list?", dismissedCerts.includes(rejectionId));
+                            
+                            // Check if already dismissed
+                            if (dismissedCerts.includes(rejectionId)) {
+                                console.log("⏭️ SKIPPING: Rejected cert already dismissed");
+                            } else {
+                                console.log("🎯 SHOWING: Rejected notification (NOT in dismissed list)");
+                                showNotification(
+                                    `❌ Rejected`, 
+                                    `Your ${latest.certificateType} certificate was rejected. Please review feedback.`, 
+                                    'rejected', 
+                                    latest
+                                );
+                                shownCertId = rejectionId;
+                                notificationShown = true;
+                            }
+                        } else {
+                            console.log("ℹ️ No rejected certificates found in array");
+                        }
+                    } else {
+                        console.log("⚠️ Rejected API error:", rejectedRes.status, rejectedRes.statusText);
+                    }
+                } catch (e) {
+                    console.error("❌ Error fetching rejected certificates:", e);
+                }
+            }
+            
+            console.log("\n📊 FINAL STATUS:");
+            console.log("  - Notification shown:", notificationShown);
+            console.log("  - Notification ID:", shownCertId || "NONE");
+            console.log("═══════════════════════════════════════════════════════\n");
+            
+        } catch (err) { 
+            console.error("❌ Error loading notifications:", err);
+        }
     }
 
-    const student=await res.json();
-
-    const name=student.name||student.username||"Student";
-
-    const initials=name.split(" ").map(w=>w[0]).join("").substring(0,2).toUpperCase();
-
-    document.getElementById("studentShort").textContent=initials;
-    document.getElementById("studentFullName").textContent=name;
-
-    document.getElementById("studentMeta").textContent=
-    `Email: ${student.email||"N/A"} • USN: ${student.usn||"N/A"} • Department: ${student.department||"N/A"}`;
-
-    document.getElementById("studentName").textContent=name;
-
+    function showNotification(title, message, type, data) {
+        console.log("showNotification called with:", {title, message, type, data});
+        const popup = document.getElementById("notificationPopup");
+        if (!popup) {
+            console.error("❌ FATAL: Notification popup element not found!");
+            return;
+        }
+        
+        console.log("✅ Step 1: Element found");
+        
+        // Set content
+        document.getElementById("notifTitle").textContent = title;
+        document.getElementById("notifContent").textContent = message;
+        console.log("✅ Step 2: Content set");
+        
+        // Generate unique ID from the data
+        let notifId = null;
+        if (type === 'success' && data) {
+            notifId = `approved_${data.certificateId || data.id}`;
+        } else if (type === 'rejected' && data) {
+            notifId = `rejected_${data.certificateId || data.id || data.rejectedDate}`;
+        }
+        
+        // Store the ID BEFORE showing so X button can access it
+        if (notifId) {
+            window.currentNotificationId = notifId;
+            console.log("✅ Notification ID stored:", notifId);
+        }
+        
+        // Clear old classes and set new type
+        popup.className = "notification-popup";  // Reset classes
+        if (type === 'success') {
+            popup.classList.add('success');
+        } else if (type === 'rejected') {
+            popup.classList.add('rejected');
+        }
+        console.log("✅ Step 3: Type class applied:", type);
+        
+        // Show rejection note if exists
+        if (data && data.rejectionNote) {
+            const noteDiv = document.getElementById("notifNote");
+            noteDiv.innerHTML = `<strong>Feedback:</strong><br>${data.rejectionNote}`;
+            noteDiv.style.display = "block";
+            console.log("✅ Step 4: Rejection note shown");
+        } else {
+            const noteDiv = document.getElementById("notifNote");
+            if(noteDiv) noteDiv.style.display = "none";
+        }
+        
+        // Make display block and visible
+        popup.style.display = "block";
+        popup.style.visibility = "visible";
+        popup.style.opacity = "1";
+        
+        // Force reflow
+        void popup.offsetWidth;
+        
+        // Add show class for animation
+        popup.classList.add('show');
+        
+        console.log("✅ Step 5: Notification displayed with animation");
+        console.log("🔍 Current popup classes:", popup.className);
+        
+        // Auto-hide after 8 seconds
+        const hideTimer = setTimeout(() => { 
+            console.log("⏱️ Auto-hiding notification");
+            popup.classList.remove('show');
+            setTimeout(() => {
+                popup.style.display = "none";
+                popup.style.visibility = "hidden";
+                console.log("✅ Notification hidden");
+            }, 400);
+        }, 8000);
+        
+        // Store timer for potential cancel
+        popup.hideTimer = hideTimer;
     }
 
-    checkProfile();
+    function closeNotification() {
+        console.log("🔌 ===== CLOSING NOTIFICATION =====");
+        console.log("Current notification ID:", window.currentNotificationId);
+        
+        const popup = document.getElementById("notificationPopup");
+        
+        if(popup && popup.hideTimer) {
+            clearTimeout(popup.hideTimer);
+            console.log("✅ Auto-hide timer cleared");
+        }
+        
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.style.display = "none";
+            popup.style.visibility = "hidden";
+            console.log("✅ Notification closed");
+        }, 400);
+        
+        // Save to dismissed list
+        if (window.currentNotificationId) {
+            console.log("📝 Saving dismissed notification...");
+            const dismissedCerts = JSON.parse(localStorage.getItem("dismissedNotifications")) || [];
+            console.log("   Current dismissed list:", dismissedCerts);
+            console.log("   Adding ID:", window.currentNotificationId);
+            
+            if (!dismissedCerts.includes(window.currentNotificationId)) {
+                dismissedCerts.push(window.currentNotificationId);
+                localStorage.setItem("dismissedNotifications", JSON.stringify(dismissedCerts));
+                console.log("✅ Saved to localStorage. New list:", dismissedCerts);
+            } else {
+                console.log("ℹ️ Already in dismissed list");
+            }
+            window.currentNotificationId = null;
+        } else {
+            console.warn("⚠️ No notification ID to dismiss!");
+        }
+        
+        console.log("🔌 ===== NOTIFICATION CLOSE COMPLETE =====");
+    }
+
+    // TEST NOTIFICATION - Remove after testing
+    function testNotification() {
+        console.clear();
+        console.log("🧪 ===== TESTING NOTIFICATION SYSTEM =====");
+        
+        console.log("\n📋 STEP 1: DOM VERIFICATION");
+        const popup = document.getElementById("notificationPopup");
+        console.log("   ✓ Popup element exists:", !!popup);
+        
+        if (!popup) {
+            console.error("❌ FATAL: Element not found!");
+            return;
+        }
+        
+        console.log("\n📋 STEP 2: CURRENT STYLES");
+        console.log("   ✓ Display:", popup.style.display);
+        console.log("   ✓ Visibility:", popup.style.visibility);
+        console.log("   ✓ Opacity:", popup.style.opacity);
+        console.log("   ✓ Classes:", popup.className);
+        console.log("   ✓ Z-index (computed):", window.getComputedStyle(popup).zIndex);
+        
+        console.log("\n📋 STEP 3: TRIGGERING TEST NOTIFICATION");
+        showNotification(
+            "✅ Test Notification", 
+            "If you see this green box in the top-right corner, the notification system is WORKING! 🎉", 
+            "success"
+        );
+        
+        console.log("\n✅ TEST TRIGGERED");
+        console.log("📍 WHAT YOU SHOULD SEE:");
+        console.log("   • Green box in top-right corner");
+        console.log("   • Slides in from the right");
+        console.log("   • Shows for 8 seconds then disappears");
+        console.log("   • Has an X button to close it");
+    }
 
     async function logout(){
-
-    await fetch('/api/auth/logout',{
-    method:'POST',
-    credentials:'include'
-    });
-
-    window.location="index.html";
-
+        await fetch('/api/auth/logout',{ method:'POST', credentials:'include' });
+        window.location="index.html";
     }
-
 </script>
 
 </body>

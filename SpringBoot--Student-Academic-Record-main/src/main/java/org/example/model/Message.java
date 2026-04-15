@@ -2,6 +2,7 @@ package org.example.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "messages")
 public class Message {
@@ -10,7 +11,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String mentorUsn;
+    private String mentorId;
 
     private String studentUsn;
 
@@ -26,12 +27,12 @@ public class Message {
         return id;
     }
 
-    public String getMentorUsn() {
-        return mentorUsn;
+    public String getMentorId() {
+        return mentorId;
     }
 
-    public void setMentorUsn(String mentorUsn) {
-        this.mentorUsn = mentorUsn;
+    public void setMentorId(String mentorId) {
+        this.mentorId = mentorId;
     }
 
     public String getStudentUsn() {

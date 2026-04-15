@@ -40,36 +40,37 @@ public class AuthController {
 
         userRepository.save(user);
 
-        // TEMP: print instead of email
-        String resetLink = "http://localhost:8080/api/auth/reset-password?token=" + token;
-        System.out.println("RESET LINK: " + resetLink);
-
-        return ResponseEntity.ok("Reset link generated (check console)");
+        // Send reset email
+        try {
+            emailService.sendResetEmail(email, token);
+            return ResponseEntity.ok("Reset link sent to your email");
+        } catch (Exception e) {
+            System.err.println("Failed to send email: " + e.getMessage());
+            return ResponseEntity.status(500).body("Failed to send reset email. Please try again later.");
+        }
     }
+
     @GetMapping("/reset-password")
     public void showResetPage(@RequestParam String token,
-                              HttpServletResponse response) throws IOException {
+            HttpServletResponse response) throws IOException {
 
         response.sendRedirect("/reset_password.html?token=" + token);
     }
 
-
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token,
-                                           @RequestParam String newPassword) {
+            @RequestParam String newPassword) {
 
         User user = userRepository.findByResetToken(token);
 
         if (user == null) {
             return ResponseEntity.badRequest().body(
-                    "Invalid token"
-            );
+                    "Invalid token");
         }
 
         if (user.getTokenExpiry() < System.currentTimeMillis()) {
             return ResponseEntity.badRequest().body(
-                    "Token expired"
-            );
+                    "Token expired");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -79,21 +80,21 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(
-                "Password updated successfully"
-        );
+                "Password updated successfully");
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String username,
-                                   @RequestParam String password,
-                                   @RequestParam String role,
-                                   HttpSession session) {
+            @RequestParam String password,
+            @RequestParam String role,
+            HttpSession session) {
 
         // Login logic remains the same
         User user = userRepository.findByUsername(username);
-        if (user == null || !passwordEncoder.matches(password, user.getPassword()) || !user.getRole().equalsIgnoreCase(role)) {
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())
+                || !user.getRole().equalsIgnoreCase(role)) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
-
 
         session.setAttribute("user", user);
 
@@ -102,18 +103,15 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestParam String username,
-                                    @RequestParam String email,
-                                    @RequestParam String password,
-                                    @RequestParam String confirmPassword, // 1. Added confirmPassword
-                                    @RequestParam String role) {
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam String confirmPassword,
+            @RequestParam String role) {
 
-        // 2. USN Length Check
-        // Assuming 'username' is the USN
         if (username == null || username.length() != 10) {
             return ResponseEntity.badRequest().body("USN must be exactly 10 characters long.");
         }
 
-        // 3. Password Match Check
         if (!password.equals(confirmPassword)) {
             return ResponseEntity.badRequest().body("Password and Confirm Password must match.");
         }
@@ -127,7 +125,7 @@ public class AuthController {
 
         User newUser = new User();
         newUser.setUsername(username);
-        newUser.setPassword(passwordEncoder.encode(password)); // Save the main password
+        newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRole(role);
         newUser.setEmail(email);
         newUser.setUsn(username);
@@ -135,7 +133,6 @@ public class AuthController {
 
         return ResponseEntity.ok("Signup successful");
     }
-
 
     @GetMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session) {

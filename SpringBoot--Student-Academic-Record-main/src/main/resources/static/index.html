@@ -141,7 +141,7 @@
 <script>
     let isLogin = true;
     const USNInput = document.getElementById("USN");
-    const emailInput = document.getElementById("email"); // New email input reference
+    const emailInput = document.getElementById("email");
     const roleInput = document.getElementById("role");
     const passwordInput = document.getElementById("password");
     const confirmPasswordInput = document.getElementById("confirm-password");
@@ -150,29 +150,24 @@
     const submitBtn = document.getElementById("submitBtn");
     const toggleLink = document.getElementById("toggle-link");
     const responseText = document.getElementById("response");
-    const emailLabel = document.getElementById("email-label"); // New email label reference
+    const emailLabel = document.getElementById("email-label");
 
     document.getElementById("toggle-link").addEventListener("click", () => {
       isLogin = !isLogin;
       formTitle.innerText = isLogin ? "User Login" : "User Sign Up";
       submitBtn.innerText = isLogin ? "Login" : "Sign Up";
       toggleLink.innerText = isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login";
-      responseText.innerText = ""; // Clear any previous error messages
+      responseText.innerText = "";
 
-      // Toggle visibility of Confirm Password and Email fields
       if (isLogin) {
         confirmPasswordLabel.style.display = 'none';
         confirmPasswordInput.style.display = 'none';
-        confirmPasswordInput.value = ''; // Clear the field
-
-        // Hide email field in Login (if you only want it for Sign Up)
+        confirmPasswordInput.value = '';
         emailLabel.style.display = 'none';
         emailInput.style.display = 'none';
       } else {
         confirmPasswordLabel.style.display = 'block';
         confirmPasswordInput.style.display = 'block';
-
-        // Show email field in Sign Up
         emailLabel.style.display = 'block';
         emailInput.style.display = 'block';
       }
@@ -194,35 +189,29 @@
       const username = USNInput.value.trim();
       const password = passwordInput.value;
       const role = roleInput.value;
-      const email = emailInput.value.trim(); // Get email value
+      const email = emailInput.value.trim();
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
-      responseText.innerText = ""; // Clear previous response
+      responseText.innerText = "";
 
-      // --- Client-Side Validation for Sign Up ---
       if (!isLogin) {
         const confirmPassword = confirmPasswordInput.value;
 
-        // 1. Check USN Length (must be 10)
         if (username.length !== 10) {
           responseText.innerText = "Error: USN must be exactly 10 characters long.";
           return;
         }
 
-        // 2. Check Password Match
         if (password !== confirmPassword) {
           responseText.innerText = "Error: Password and Confirm Password do not match.";
           return;
         }
       }
-      // --- End Client-Side Validation ---
 
-      // Prepare data payload
       const payload = { username, password, role };
 
       if (!isLogin) {
-          // Only include confirmPassword and email in the payload for signup
           payload.confirmPassword = confirmPasswordInput.value;
-          payload.email = email; // Include email for signup
+          payload.email = email;
       }
 
       try {
@@ -238,13 +227,29 @@
               localStorage.setItem("role", role);
               alert("Login successful!");
               if (role === "STUDENT") {
-                window.location.href = "student_dashboard.html";
+                // Check if student has completed setup
+                const profileRes = await fetch("/api/student/me", {
+                  credentials: 'include'
+                });
+                
+                if (profileRes.ok) {
+                  const profileData = await profileRes.json();
+                  // If profile has all required fields (dob, mentorId, etc), go to dashboard
+                  if (profileData.dob && profileData.mentorId) {
+                    window.location.href = "student_dashboard.html";
+                  } else {
+                    // First-time student, go to setup
+                    window.location.href = "student_setup.html";
+                  }
+                } else {
+                  // Couldn't check, default to setup for safety
+                  window.location.href = "student_setup.html";
+                }
               } else {
                 window.location.href = "mentor_dashboard.html";
               }
             } else {
               alert("Sign up successful! Please login.");
-              // **CHANGE 1: Refresh the login page after sign up**
               window.location.reload();
             }
           } else {

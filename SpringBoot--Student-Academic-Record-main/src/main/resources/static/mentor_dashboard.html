@@ -6,370 +6,629 @@
     <title>Mentor Dashboard</title>
     <style>
         :root{
-          --bg:#f4f7fb;
-          --card:#ffffff;
-          --accent:#1976d2;
-          --muted:#6b7280;
-          --radius:10px;
+          --bg:#0a0e27;
+          --card: rgba(255, 255, 255, 0.05);
+          --accent:#667eea;
+          --muted:#a0aec0;
+          --radius:12px;
         }
         *{box-sizing:border-box}
-        body{
-          margin:0;
-          font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
-          background:var(--bg);
-          color:#0f172a;
+
+        /* HIDE SCROLLBAR */
+        html, body {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
+        html::-webkit-scrollbar, body::-webkit-scrollbar {
+          display: none;
+        }
+
+        body {
+          margin:0;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          background: var(--bg);
+          color:#ffffff;
+          min-height:100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Fixed Starfield background */
+        body::before {
+          content:'';
+          position:fixed;
+          top:0; left:0; width:100%; height:100%;
+          background-image:
+            radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 90px 10px, #eee, rgba(0,0,0,0));
+          background-repeat:repeat;
+          background-size:200px 200px;
+          animation:twinkle 5s infinite;
+          pointer-events:none;
+          z-index:1;
+        }
+
+        @keyframes twinkle { 0%, 100% { opacity:0.4; } 50% { opacity:0.8; } }
+        body > * { position:relative; z-index:2; }
+
         .topbar{
           height:64px;
           display:flex;
           align-items:center;
           justify-content:space-between;
-          padding:10px 20px;
-          background:linear-gradient(90deg,var(--card),transparent);
-          border-bottom:1px solid rgba(15,23,42,0.04);
+          padding:0 24px;
+          background: rgba(10, 14, 39, 0.8);
+          border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+          backdrop-filter: blur(12px);
+          flex-shrink: 0;
         }
-        .brand{display:flex;align-items:center;gap:12px}
+
+        .container{
+            max-width:1100px;
+            width: 100%;
+            margin:0 auto;
+            padding:32px 20px;
+            display:flex;
+            flex-direction:column;
+            gap:24px;
+            flex-grow: 1; /* This allows container to expand */
+        }
+
+        .brand{display:flex;align-items:center;gap:12px;}
         .logo{
-          width:44px;height:44px;border-radius:8px;background:var(--accent);
+          width:38px;height:38px;border-radius:8px;
+          background:linear-gradient(135deg, #667eea, #764ba2);
           display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
         }
-        .title{font-size:18px;font-weight:600}
-        .muted{color:var(--muted);font-size:13px}
 
-        .container{max-width:1100px;margin:18px auto;padding:20px;display:flex;flex-direction:column;gap:18px}
-
-        .header{
-          display:flex;align-items:center;justify-content:space-between;gap:12px;
-        }
-        .profile{
-          display:flex;align-items:center;gap:12px;
-        }
-        .avatar{width:56px;height:56px;border-radius:12px;background:#e6f0fb;display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:18px}
-        .grid{
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-          gap:16px;
-        }
-        .card{
-          background:var(--card);
-          border-radius:var(--radius);
-          padding:18px;
-          box-shadow:0 8px 28px rgba(11,20,40,0.06);
-          display:flex;flex-direction:column;gap:10px;
-        }
-        .card .title{font-size:16px;font-weight:700}
-        .card .desc{color:var(--muted);font-size:13px}
-        .card .actions{display:flex;gap:8px;margin-top:8px}
-        .btn{
-          padding:10px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600;background:var(--accent);color:white;
-        }
-        .link{
-          text-decoration:none;color:var(--accent);font-weight:700;padding:8px;border-radius:8px;border:1px solid rgba(25,118,210,0.08)
+        .avatar{
+            width:60px;height:60px;border-radius:14px;
+            background:#ffffff;
+            display:flex;align-items:center;justify-content:center;
+            color:#667eea;font-weight:700;font-size:20px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
         .notif{
-          background:linear-gradient(90deg,rgba(25,118,210,0.04),transparent);
-          border-radius:10px;padding:12px;border:1px solid rgba(15,23,42,0.04)
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.05));
+          border-radius:var(--radius);
+          padding:18px 24px;
+          border: 1px solid rgba(102, 126, 234, 0.2);
+          cursor: pointer;
         }
+
+        .grid{
+          display:grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap:20px;
+          flex-grow: 1; /* Grid expands to take space */
+        }
+
+        .card{
+          background: var(--card);
+          backdrop-filter: blur(10px);
+          border-radius:var(--radius);
+          padding:24px;
+          display:flex;
+          flex-direction:column;
+          gap:14px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* DYNAMIC SPACING FOR MESSAGE CARD */
+        .full-row { grid-column: 1 / -1; }
+        
+        .grow-card {
+            flex-grow: 1;
+            min-height: 250px;
+        }
+
+        .card .title{font-size:18px;font-weight:700;color:#ffffff}
+        .card .desc{color:#cbd5e0;font-size:14px;line-height:1.5}
+
+        .btn, .link{
+          padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;
+          background:linear-gradient(135deg, #667eea, #764ba2);
+          color:white;text-decoration:none;display:inline-block;text-align:center;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            outline: none;
+            font-family: inherit;
+        }
+
+        #messageText {
+            flex-grow: 1; /* Makes textarea fill the card height */
+            min-height: 120px;
+            resize: none;
+        }
+
+        .tools{ display:flex; flex-wrap:wrap; gap:12px; }
+        .tool{
+          display:flex; align-items:center; gap:8px;
+          background: rgba(255,255,255,0.08);
+          padding:10px 16px; border-radius:8px;
+          text-decoration:none; color:white; font-size:13px;
+          border:1px solid rgba(255,255,255,0.1);
+        }
+        .tool img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+
+        /* NOTIFICATION POPUP */
+        .notification-popup {
+            position: fixed !important;
+            top: 25px !important; 
+            right: 25px !important;
+            background: #1e1b4b;
+            color: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            max-width: 360px;
+            min-width: 280px;
+            z-index: 99999 !important;
+            border-left: 5px solid var(--accent);
+            backdrop-filter: blur(10px);
+            pointer-events: auto !important;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .notification-popup[style*="display: block"] {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateX(0) !important;
+        }
+
+        .notification-popup.success { border-left-color: #22c55e; }
+        .notification-popup.rejected { border-left-color: #ef4444; }
+
+        .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 800; }
+        .notification-close { background: rgba(255,255,255,0.1); border: none; color: white; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; transition: all 0.2s ease; }
+        .notification-close:hover { background: rgba(255,255,255,0.2); }
+
+        .notification-note {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .tool img { width: 18px; height: 18px; filter: brightness(0) invert(1); }
+
         @media(max-width:680px){
-          .header{flex-direction:column;align-items:flex-start;gap:8px}
+          .grid { grid-template-columns: 1fr; }
+          .full-row { grid-column: auto; }
         }
-        .tools{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  margin-top:12px;
-}
-
-.tool{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:white;
-  padding:8px 12px;
-  border-radius:8px;
-  text-decoration:none;
-  color:#0f172a;
-  font-size:13px;
-  border:1px solid rgba(0,0,0,0.05);
-  box-shadow:0 3px 10px rgba(0,0,0,0.05);
-}
-
-.tool img{
-  width:18px;
-  height:18px;
-}
     </style>
 </head>
 <body>
-<div class="topbar">
-    <div class="brand">
-        <div class="logo">MT</div>
-        <div>
-            <div class="title">Mentor Portal</div>
-            <div class="muted" style="font-size:12px">Validate & Approve Student Data</div>
-        </div>
-    </div>
 
-    <div style="display:flex;align-items:center;gap:12px">
-        <div class="muted">Mentor: <span id="mentorShortName">—</span></div>
-        <button id="logoutBtn" onclick="logout()" style="padding:8px 12px;border-radius:8px;border:0;background:#ef4444;color:white;cursor:pointer">Logout</button>
+<!-- SIMPLE NOTIFICATION TOAST -->
+<div id="notificationPopup" style="position:fixed;top:20px;right:20px;background:#22c55e;color:white;padding:20px 24px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);z-index:99999;display:none;min-width:300px;max-width:400px;animation:slideIn 0.4s ease;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div>
+            <div id="notifTitle" style="font-weight:800;font-size:16px;margin-bottom:6px;">Notification</div>
+            <div id="notifContent" style="font-size:14px;color:rgba(255,255,255,0.9);">Message goes here</div>
+            <div id="notifNote" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.2);font-size:12px;display:none;"></div>
+        </div>
+        <button onclick="closeMentorNotification()" style="background:rgba(255,255,255,0.2);border:none;color:white;cursor:pointer;padding:4px 8px;border-radius:6px;font-weight:bold;flex-shrink:0;">✕</button>
     </div>
 </div>
 
-<div class="container">
-    <div class="header">
-        <div style="display:flex;gap:12px;align-items:center">
-            <!-- Mentor initials (auto-filled from JS) -->
-            <div class="avatar" id="mentorShort">--</div>
+<style>
+@keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+}
+#notificationPopup.show { display: block !important; animation: slideIn 0.4s ease; }
+#notificationPopup.hide { animation: slideOut 0.4s ease; }
+#notificationPopup.success { background: #22c55e; }
+#notificationPopup.rejected { background: #ef4444; }
+#notificationPopup.warning { background: #f59e0b; }
+</style>
 
-            <div>
-                <!-- Mentor full name (auto-filled from JS) -->
-                <div id="mentorFullName" style="font-weight:700">Loading...</div>
-                <!-- Mentor email, USN, department (auto-filled from JS) -->
-                <div class="muted" id="mentorMeta">Loading...</div>
-            </div>
+<nav class="topbar">
+    <div class="brand">
+        <div class="logo">MT</div>
+        <div>
+            <div style="font-size: 16px; font-weight: 700;">Mentor Portal</div>
+            <div style="color: var(--muted); font-size: 11px;">Academic Management</div>
         </div>
     </div>
+    <div style="display:flex;align-items:center;gap:15px">
+        <div style="color: #cbd5e0; font-size: 13px;">Mentor: <span id="mentorShortName" style="color:white; font-weight:600;">—</span></div>
+        <button onclick="logout()" style="padding:6px 12px; border-radius:6px; border:0; background:#ef4444; color:white; cursor:pointer; font-weight:600; font-size:12px;">Logout</button>
+    </div>
+</nav>
 
-    <div style="display:flex;gap:12px;align-items:center">
-            <div class="notif" id="notifications">
-                <div style="font-weight:700">Notifications</div>
-                <div class="muted" id="notifText" style="margin-top:6px">No new notifications</div>
-            </div>
+<div class="container">
+    <header style="display:flex; gap:20px; align-items:center;">
+        <div class="avatar" id="mentorShort">--</div>
+        <div>
+            <div id="mentorFullName" style="font-size:24px; font-weight:800; color:white;">Loading...</div>
+            <div id="mentorMeta" style="color:var(--muted); font-size:14px; margin-top:4px;">Fetching profile...</div>
         </div>
+    </header>
+
+    <div class="notif" id="notifications" onclick="goToValidation()">
+        <div style="font-weight:700; font-size:15px;">🔔 Notifications</div>
+        <div id="notifText" style="margin-top:6px; color:#e2e8f0; font-size:14px;">No new notifications 🎉</div>
     </div>
 
     <div class="grid">
         <div class="card">
             <div class="title">Filter Students</div>
-            <div class="desc">View your mentees, filter by year, department, or submission status.</div>
-            <div class="actions">
-                <a href="/mentor_filterstudents.html" class="link">Filter Students</a>
-            </div>
+            <div class="desc">Find mentees by year, department, or submission status.</div>
+            <a href="mentor_filterstudents.html" class="link">Search Mentees</a>
         </div>
 
         <div class="card">
-            <div class="title">Validate Marks & Activities</div>
-            <div class="desc">Review pending uploads from students. Approve to lock or send back for correction.</div>
-            <div class="actions">
-               <a class="link" href="mentor_validate.html">Review</a>
-            </div>
+            <div class="title">Validate Submissions</div>
+            <div class="desc">Review pending marks and certificates from your students.</div>
+            <a class="link" href="mentor_validate.html">Review Pending</a>
         </div>
 
         <div class="card">
-            <div class="title">Monitor Platform</div>
-            <div class="desc">Usage stats and platform health. See which students haven't completed setup.</div>
-            <div class="actions">
-                <a class="link" href="mentor_monitor.html">Open</a>
+            <div class="title">Student Analytics</div>
+            <div class="desc">Visualize trends and performance across all semesters.</div>
+            <a class="link" href="mentor_analytics.html">Open Analytics</a>
+        </div>
+
+        <div class="card full-row grow-card">
+            <div class="title">Quick Message</div>
+            <div class="desc">Send feedback or reminders directly to a student's dashboard.</div>
+            <input type="text" id="studentUsn" placeholder="Student USN" class="input-field" style="max-width: 300px;">
+            <textarea id="messageText" placeholder="Write your message here..." class="input-field"></textarea>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <button onclick="sendMessage()" class="btn">Send Message</button>
+                <div id="msgStatus" style="font-size:12px;"></div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="title">My Mentees</div>
-            <div class="desc">Quick list of your linked students (auto-linked by Mentor ID). Click to view student profiles.</div>
-            <div class="actions">
-                <<a class="link" href="my_mentees.html">View</a>
+        <div class="card full-row">
+            <div class="title">Mentor Resources</div>
+            <div class="tools">
+                <a class="tool" target="_blank" href="https://chat.openai.com"><img src="https://img.icons8.com/ios-filled/50/chatgpt.png"> ChatGPT</a>
+                <a class="tool" target="_blank" href="https://scholar.google.com"><img src="https://img.icons8.com/ios-filled/50/google-scholar.png"> Google Scholar</a>
+                <a class="tool" target="_blank" href="https://www.kaggle.com"><img src="https://img.icons8.com/ios-filled/50/database.png"> Kaggle Datasets</a>
+                <a class="tool" href="mentor_monitor.html"><img src="https://img.icons8.com/ios-filled/50/combo-chart.png"> System Monitor</a>
             </div>
         </div>
-
-
-
-            <div class="card">
-                <div class="title">View Analytics</div>
-                <div class="desc">Student Analytics throughout all Sems</div>
-                <div class="actions">
-                    <<a class="link" href="mentor_analytics.html">View</a>
-                </div>
-            </div>
-        <div class="card">
-            <div class="title">Send Message</div>
-            <div class="desc">Send a message or feedback to a student</div>
-
-            <input type="text"
-                   id="studentUsn"
-                   placeholder="Student USN"
-                   class="input-field">
-
-            <textarea id="messageText"
-                      placeholder="Enter message"
-                      class="input-field textarea"></textarea>
-
-            <div class="actions">
-                <button onclick="sendMessage()" class="btn primary">Send Message</button>
-            </div>
-
-            <div id="msgStatus" class="muted" style="margin-top:8px"></div>
-        </div>
-    </div>
-
-
-
-<div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
-
-    <div class="card" style="flex:1;min-width:320px">
-
-        <div style="font-weight:700">Mentor Tools</div>
-        <div class="desc" style="margin-top:8px">
-            Useful resources for professors
-        </div>
-
-        <div class="tools">
-
-            <a class="tool" target="_blank" href="https://chat.openai.com">
-                <img src="https://img.icons8.com/ios-filled/50/chatgpt.png">
-                ChatGPT
-            </a>
-
-            <a class="tool" target="_blank" href="https://scholar.google.com">
-                <img src="https://img.icons8.com/ios-filled/50/google-scholar.png">
-                Google Scholar
-            </a>
-
-            <a class="tool" target="_blank" href="https://sheets.google.com">
-                <img src="https://img.icons8.com/ios-filled/50/google-sheets.png">
-                Google Sheets
-            </a>
-
-            <a class="tool" target="_blank" href="https://www.kaggle.com/datasets">
-                <img src="https://img.icons8.com/ios-filled/50/database.png">
-                Teaching Datasets
-            </a>
-
-            <a class="tool" href="mentor_monitor.html">
-                <img src="https://img.icons8.com/ios-filled/50/combo-chart.png">
-                Platform Monitor
-            </a>
-
-        </div>
-
     </div>
 </div>
 
 <script>
-    // safe HTML escape helper
-    function escapeHtml(str) {
-      return String(str || '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+    async function fetchUser() {
+        try {
+            console.log("📍 Fetching mentor profile...");
+            const res = await fetch('/api/mentor/me', { credentials: 'include' });
+            
+            if (!res.ok) { 
+                console.error("❌ Profile API failed:", res.status, res.statusText);
+                // Set fallback values
+                document.getElementById("mentorShort").textContent = "MT";
+                document.getElementById("mentorFullName").textContent = "Mentor";
+                document.getElementById("mentorShortName").textContent = "Mentor";
+                document.getElementById("mentorMeta").textContent = "Loading...";
+                return; 
+            }
+            
+            const user = await res.json();
+            console.log("✅ Profile loaded:", user);
+            
+            const name = user.name || user.username || "Mentor";
+            const initials = name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+            document.getElementById("mentorShort").textContent = initials;
+            document.getElementById("mentorFullName").textContent = name;
+            document.getElementById("mentorShortName").textContent = name;
+            document.getElementById("mentorMeta").textContent = `${user.department || 'N/A'} Department • USN: ${user.usn || "N/A"}`;
+            console.log("✅ Profile updated on page");
+        } catch (e) { 
+            console.error("❌ API Error:", e);
+            document.getElementById("mentorShort").textContent = "MT";
+            document.getElementById("mentorFullName").textContent = "Error Loading";
+            document.getElementById("mentorMeta").textContent = "Connection failed";
+        }
     }
 
-   async function fetchUser() {
-  const res = await fetch('/api/mentor/me', {
-    credentials: 'include'   // ✅ REQUIRED
-  });
-
-  if (!res.ok) {
-    window.location = "index.html";
-    return;
-  }
-
-  const user = await res.json();
-
-  if (!user.department || user.department.trim() === "") {
-    window.location = "mentor_setup.html";
-    return;
-  }
-
-  const initials = (user.name || user.username || "??")
-      .split(" ")
-      .map(word => word[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
-
-  document.getElementById("mentorShort").textContent = initials;
-  document.getElementById("mentorFullName").textContent = user.name || user.username;
-  document.getElementById("mentorMeta").textContent =
-    `Email: ${user.email || "N/A"} • USN: ${user.usn || "N/A"} • Department: ${user.department || "N/A"}`;
-
-    document.getElementById("mentorShortName").textContent = name;
-}
-
-   
-   ////////Notification Logic 
-   async function loadPendingCertificates() {
-	  const res = await fetch('/api/mentor/certificates/pending', {
-	    credentials: 'include'   // 🔴 REQUIRED
-	  });
-	
-	  if (!res.ok) return;
-	
-	  const certs = await res.json();
-	
-	  const notif = document.getElementById("notifText");
-	  const list = document.getElementById("pendingList");
-	
-	  if (certs.length === 0) {
-	    notif.textContent = "No new notifications";
-	    list.textContent = "No pending validations";
-	    return;
-	  }
-	
-	  notif.textContent = certs.length + " certificate(s) pending approval";
-	
-	  list.innerHTML = certs.map(c =>
-	    `<div>${c.studentUsn} - ${c.certificateType}</div>`
-	  ).join("");
-	}
-
-	/////
-
-
-
-    // call on load
-    fetchUser();
-    loadPendingCertificates();
-
-    // logout (POST is common but adjust to your backend)
-    async function logout() {
-      try {
-        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-      } catch (err) {
-        console.warn('Logout request failed, redirecting anyway.', err);
-      } finally {
-        window.location.href = 'index.html';
-      }
+    async function loadPendingCertificates() {
+        try {
+            console.log("📬 Fetching pending certificates...");
+            const res = await fetch('/api/mentor/pending', { credentials: 'include' });
+            
+            if (!res.ok) {
+                console.warn("⚠️ Pending API error:", res.status);
+                return;
+            }
+            
+            const data = await res.json();
+            console.log("✅ Pending data received:", data);
+            
+            const count = (data.certificates?.length || 0) + (data.marks?.length || 0);
+            console.log("📊 Total pending items:", count);
+            
+            if (count > 0) {
+                document.getElementById("notifText").innerHTML = 
+                    `<span style="color:#fbbf24; font-weight:bold;">⏰ Action Required:</span> ${count} new items waiting for validation.`;
+                console.log("✅ Updated pending count on UI");
+            }
+        } catch (e) { 
+            console.warn("⚠️ Error loading pending:", e);
+        }
     }
 
-    // Placeholder helpers for buttons — replace with real implementations
-    function openValidations() {
-    	window.location.href = 'mentor_validate.html';
+    function goToValidation() {
+        if (!document.getElementById("notifText").textContent.includes("No new notifications")) {
+            window.location.href = "mentor_validate.html";
+        }
     }
-    function validateAll() {
-      if (confirm('Validate all pending items?')) {
-        // replace with real API call if needed
-        alert('All pending items validated (demo).');
-      }
-    }
-    function messageAll() {
-      // open messaging page or trigger API
-      window.location.href = '/mentor/messages';
-    }
-    //send message
+
     async function sendMessage(){
+        const studentUsn = document.getElementById("studentUsn").value;
+        const message = document.getElementById("messageText").value;
+        const status = document.getElementById("msgStatus");
+        if(!studentUsn || !message) { status.innerHTML = "Please fill all fields"; return; }
 
-  const studentUsn = document.getElementById("studentUsn").value;
-  const message = document.getElementById("messageText").value;
+        const res = await fetch("/api/messages/send",{
+            method:"POST",
+            credentials:"include",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ studentUsn, message })
+        });
+        status.innerHTML = res.ok ? "<span style='color:#4ade80'>✔ Message sent</span>" : "<span style='color:#f87171'>✘ Failed to send</span>";
+    }
 
-  const res = await fetch("/api/messages/send",{
-    method:"POST",
-    credentials:"include",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      studentUsn:studentUsn,
-      message:message
-    })
-  });
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = 'index.html';
+    }
 
-  if(res.ok){
-     document.getElementById("msgStatus").innerHTML =
-     "<span style='color:green'>Message sent</span>";
-  }else{
-     document.getElementById("msgStatus").innerHTML =
-     "<span style='color:red'>Failed</span>";
-  }
-}
+    // NOTIFICATION FUNCTIONS
+    async function loadMenteeRejectionNotifications() {
+        try {
+            console.log("🔔 ===== LOADING REJECTION NOTIFICATIONS =====");
+            const dismissedNotifs = JSON.parse(localStorage.getItem("dismissedMenteeNotifs")) || [];
+            console.log("📋 Dismissed notifications list:", dismissedNotifs);
+            
+            // Try primary API endpoint
+            console.log("🔗 Trying /api/mentor/mentee-certificate-rejections...");
+            let rejectedRes = await fetch('/api/mentor/mentee-certificate-rejections', { 
+                credentials: 'include',
+                headers: {'Accept': 'application/json'}
+            }).catch(err => {
+                console.warn("⚠️ Primary endpoint error:", err.message);
+                return null;
+            });
+            
+            // If primary fails, try alternative endpoint
+            if (!rejectedRes) {
+                console.log("🔗 Primary failed, trying /api/student/certificate-rejections...");
+                rejectedRes = await fetch('/api/student/certificate-rejections', { 
+                    credentials: 'include',
+                    headers: {'Accept': 'application/json'}
+                }).catch(err => {
+                    console.warn("⚠️ Alternative endpoint error:", err.message);
+                    return null;
+                });
+            }
+            
+            if (rejectedRes && rejectedRes.ok) {
+                try {
+                    const rejected = await rejectedRes.json();
+                    console.log("✅ Rejected certificates received:", rejected);
+                    
+                    if (rejected && Array.isArray(rejected) && rejected.length > 0) {
+                        const latest = rejected[0];
+                        console.log("🎯 Latest rejection found:", latest);
+                        
+                        const rejectionId = `mentee_rejected_${latest.studentId || latest.usn}_${latest.certificateType}_${latest.rejectedDate || latest.id}`;
+                        if (!dismissedNotifs.includes(rejectionId)) {
+                            console.log("🔔 TRIGGERING REJECTION NOTIFICATION");
+                            showMentorNotification(
+                                `❌ Mentee Certificate Rejected`, 
+                                `${latest.studentName || latest.studentUsn || 'A mentee'}'s ${latest.certificateType} certificate was rejected.`, 
+                                'rejected', 
+                                latest
+                            );
+                            window.currentMentorNotifId = rejectionId;
+                        } else {
+                            console.log("⏭️ Notification already dismissed");
+                        }
+                    } else {
+                        console.log("ℹ️ No rejected certificates in response");
+                    }
+                } catch (parseErr) {
+                    console.error("❌ Error parsing response:", parseErr);
+                }
+            } else if (rejectedRes) {
+                console.log("⚠️ API returned non-OK status:", rejectedRes.status);
+            } else {
+                console.log("⚠️ No API response");
+            }
+            
+            console.log("🔔 ===== NOTIFICATION LOADING COMPLETE =====");
+        } catch (err) { 
+            console.error("❌ Fatal error in loadMenteeRejectionNotifications:", err);
+        }
+    }
+
+    function showMentorNotification(title, message, type = 'success', data = null) {
+        console.log("🔔 SHOWING NOTIFICATION");
+        console.log("   Title:", title);
+        console.log("   Message:", message);
+        console.log("   Type:", type);
+        
+        const popup = document.getElementById("notificationPopup");
+        if (!popup) {
+            console.error("❌ ERROR: Notification element not found!");
+            return;
+        }
+        
+        console.log("✅ Notification element found");
+        
+        // Set content
+        console.log("📝 Setting content...");
+        document.getElementById("notifTitle").textContent = title;
+        document.getElementById("notifContent").textContent = message;
+        
+        // Set color based on type
+        popup.className = type; // success, rejected, warning
+        console.log("🎨 Applied type class:", type);
+        
+        // Show notes if available
+        if (data && data.rejectionNote) {
+            const noteDiv = document.getElementById("notifNote");
+            noteDiv.textContent = data.rejectionNote;
+            noteDiv.style.display = "block";
+            console.log("📌 Showing rejection note");
+        } else {
+            const noteDiv = document.getElementById("notifNote");
+            noteDiv.style.display = "none";
+        }
+        
+        // Remove any existing classes and animations
+        popup.classList.remove('hide');
+        popup.classList.remove('show');
+        popup.style.display = 'none';
+        
+        console.log("🔄 Forcing animation restart...");
+        // Force reflow to restart animation
+        void popup.offsetWidth;
+        
+        // Show with animation
+        console.log("📤 Making notification visible...");
+        popup.style.display = 'block';
+        popup.classList.add('show');
+        
+        console.log("✅ Notification displayed!");
+        
+        // Auto-hide after 8 seconds
+        const hideTimer = setTimeout(() => {
+            console.log("⏱️ Auto-hiding notification");
+            popup.classList.remove('show');
+            popup.classList.add('hide');
+            setTimeout(() => {
+                popup.style.display = 'none';
+                console.log("✅ Notification hidden");
+            }, 400);
+        }, 8000);
+        
+        popup.hideTimer = hideTimer;
+    }
+
+    function closeMentorNotification() {
+        console.log("❌ Closing notification");
+        const popup = document.getElementById("notificationPopup");
+        
+        if (popup && popup.hideTimer) {
+            clearTimeout(popup.hideTimer);
+        }
+        
+        popup.classList.remove('show');
+        popup.classList.add('hide');
+        setTimeout(() => {
+            popup.style.display = 'none';
+        }, 400);
+        
+        // Save to dismissed
+        if (window.currentMentorNotifId) {
+            const dismissed = JSON.parse(localStorage.getItem("dismissedMenteeNotifs")) || [];
+            if (!dismissed.includes(window.currentMentorNotifId)) {
+                dismissed.push(window.currentMentorNotifId);
+                localStorage.setItem("dismissedMenteeNotifs", JSON.stringify(dismissed));
+            }
+        }
+    }
+
+    // TEST NOTIFICATION - Run this in console
+    function testMentorNotification() {
+        console.clear();
+        console.log("🧪 ===== TESTING NOTIFICATION SYSTEM =====");
+        
+        const popup = document.getElementById("notificationPopup");
+        console.log("1️⃣ Checking notification element...");
+        console.log("   - Element exists:", !!popup);
+        
+        if (!popup) {
+            console.error("❌ FATAL: Notification element not found in DOM!");
+            return;
+        }
+        
+        console.log("✅ Element found. Current styles:");
+        console.log("   - Display:", popup.style.display);
+        console.log("   - Z-index:", window.getComputedStyle(popup).zIndex);
+        console.log("   - Position:", window.getComputedStyle(popup).position);
+        
+        console.log("2️⃣ Triggering test notification...");
+        showMentorNotification(
+            "✅ NOTIFICATION TEST SUCCESSFUL", 
+            "You should see this green box in the top-right corner! ➡️", 
+            "success"
+        );
+        
+        console.log("✅ Test complete!");
+        console.log("⏱️  Notification will auto-hide in 8 seconds");
+        console.log("🖱️  Click the X button to close it manually");
+        console.log("🧪 ===== TEST COMPLETE =====");
+    }
+
+    // CALL EVERYTHING ON PAGE LOAD
+    function initMentorDashboard() {
+        console.clear();
+        console.log("🚀 ===== INITIALIZING MENTOR DASHBOARD =====");
+        console.log("⏰ Timestamp:", new Date().toLocaleTimeString());
+        
+        console.log("1️⃣ Loading mentor profile...");
+        fetchUser().then(() => {
+            console.log("✅ Profile loading complete");
+        });
+        
+        console.log("2️⃣ Loading pending certificates...");
+        loadPendingCertificates().then(() => {
+            console.log("✅ Pending loading complete");
+        });
+        
+        console.log("3️⃣ Loading rejection notifications...");
+        setTimeout(() => {
+            loadMenteeRejectionNotifications().then(() => {
+                console.log("✅ Notifications loading complete");
+            });
+        }, 500);
+        
+        console.log("🚀 ===== INITIALIZATION COMPLETE =====");
+        console.log("ℹ️  To test notifications, run: testMentorNotification()");
+    }
+
+    // Run initialization
+    console.log("📄 Mentor Dashboard Script Loaded");
+    
+    if (document.readyState === 'loading') {
+        console.log("⏳ DOM not ready, waiting for DOMContentLoaded...");
+        document.addEventListener('DOMContentLoaded', initMentorDashboard);
+    } else {
+        console.log("✅ DOM already ready, initializing...");
+        initMentorDashboard();
+    }
+    
+    // Also run on window load as backup
+    window.addEventListener('load', () => {
+        console.log("📦 Window load event triggered");
+    });
 </script>
 </body>
 </html>

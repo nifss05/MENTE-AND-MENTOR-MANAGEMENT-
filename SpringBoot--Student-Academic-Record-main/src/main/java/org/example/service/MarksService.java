@@ -31,10 +31,9 @@ public class MarksService {
 
         marksRepository.deleteByStudentUsnAndSemester(
                 usn,
-                request.getSemester()
-        );
+                request.getSemester());
         Student student = studentRepository.findByUsn(usn);
-        if (student == null || student.getMentorUsn() == null) {
+        if (student == null || student.getMentorId() == null) {
             throw new IllegalStateException("Student mentor not assigned");
         }
         request.getSubjects().forEach(s -> {
@@ -50,7 +49,7 @@ public class MarksService {
             m.setGrade(s.getGrade());
             m.setValidated(false);
             m.setActivityPoints(0);
-            m.setMentorUsn(student.getMentorUsn());
+            m.setMentorId(student.getMentorId());
 
             marksRepository.save(m);
         });
@@ -61,8 +60,7 @@ public class MarksService {
     // ============================
     public Map<String, Object> getMarksForSemester(String usn, Integer sem) {
 
-        List<Marks> marks =
-                marksRepository.findByStudentUsnAndSemester(usn, sem);
+        List<Marks> marks = marksRepository.findByStudentUsnAndSemester(usn, sem);
 
         return Map.of(
                 "semester", sem,
@@ -74,13 +72,12 @@ public class MarksService {
                         "see", m.getSee(),
                         "total", m.getTotalMarks(),
                         "grade", m.getGrade(),
-                        "validated", m.getValidated()
-                )).toList()
-        );
+                        "validated", m.getValidated())).toList());
     }
-    public Map<String, Integer> getPerformance(Integer semester, String mentorUsn) {
 
-        Object result = marksRepository.getPerformanceStats(semester, mentorUsn);
+    public Map<String, Integer> getPerformance(Integer semester, String mentorId) {
+
+        Object result = marksRepository.getPerformanceStats(semester, mentorId);
 
         Map<String, Integer> map = new HashMap<>();
 
