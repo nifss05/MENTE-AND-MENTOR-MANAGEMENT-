@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: mente-mentor-management
+    runtime: java
+    plan: free
+    buildCommand: |
+      cd SpringBoot--Student-Academic-Record-main && mvn clean package -DskipTests
+    startCommand: |
+      cd SpringBoot--Student-Academic-Record-main && java -jar target/*.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 21
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SERVER_PORT
+        value: "8080"
