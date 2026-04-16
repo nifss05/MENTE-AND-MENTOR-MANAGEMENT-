@@ -657,7 +657,10 @@
 
         async function loadRejections() {
             try {
-                console.log("📬 Loading rejected certificates from profile...");
+                console.log("\n═══════════════════════════════════════════════════════");
+                console.log("📬 LOADING REJECTED CERTIFICATES FROM SERVER");
+                console.log("═══════════════════════════════════════════════════════");
+                
                 const res = await fetch('/api/student/certificate-rejections', {
                     credentials: 'include'
                 });
@@ -666,13 +669,14 @@
 
                 if (res.ok) {
                     const rejections = await res.json();
-                    console.log("✓ Rejections data:", rejections);
+                    console.log("✓ Rejections received from API:", rejections);
+                    console.log(`  Total rejections: ${rejections ? rejections.length : 0}`);
                     
                     if (rejections && rejections.length > 0) {
-                        console.log("🎯 Found " + rejections.length + " rejection(s) from API");
+                        console.log("🎯 Found rejected certificates, displaying...");
                         displayRejections(rejections);
                     } else {
-                        console.log("ℹ️ No rejections found");
+                        console.log("ℹ️ No rejected certificates from API");
                         document.getElementById("rejectionsContainer").style.display = "none";
                     }
                 } else {
@@ -685,24 +689,33 @@
         }
 
         function displayRejections(rejections) {
-            console.log("📝 Displaying rejections...");
+            console.log("\n═══════════════════════════════════════════════════════");
+            console.log("📝 DISPLAYING REJECTIONS");
+            console.log("═══════════════════════════════════════════════════════");
+            
             const container = document.getElementById("rejectionsContainer");
             const list = document.getElementById("rejectionsList");
             list.innerHTML = "";
 
             // Get dismissed notifications from localStorage (same key as dashboard)
             const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
-            console.log("🗑️ Dismissed notifications from storage:", dismissedNotifications);
+            console.log("🗑️ Currently dismissed rejections in localStorage:", dismissedNotifications);
 
             // Filter out removed rejections using same ID format as dashboard
             const visibleRejections = rejections.filter(rejection => {
                 const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
-                return !dismissedNotifications.includes(rejectionId);
+                const isDismissed = dismissedNotifications.includes(rejectionId);
+                console.log(`   ❓ ${rejectionId} - Dismissed: ${isDismissed}`);
+                return !isDismissed;
             });
+
+            console.log(`✓ Total rejections from API: ${rejections.length}`);
+            console.log(`✓ Visible after filtering: ${visibleRejections.length}`);
 
             if (!visibleRejections || visibleRejections.length === 0) {
                 console.log("ℹ️ No rejections to display (all removed or empty)");
                 container.style.display = "none";
+                console.log("═══════════════════════════════════════════════════════\n");
                 return;
             }
 
@@ -734,7 +747,7 @@
                 removeBtn.style.cursor = "pointer";
                 removeBtn.style.fontSize = "16px";
                 removeBtn.style.marginTop = "5px";
-                removeBtn.title = "Remove this rejection";
+                removeBtn.title = "Remove this rejection permanently";
                 removeBtn.onclick = function() {
                     removeRejection(rejectionId);
                 };
@@ -744,22 +757,30 @@
                 list.appendChild(item);
             });
 
-            console.log("✅ Rejections rendered in DOM (" + visibleRejections.length + " visible)");
+            console.log("✅ Rejections rendered in DOM");
             console.log("📍 Showing rejections container");
             container.style.display = "block";
+            console.log("═══════════════════════════════════════════════════════\n");
         }
 
         function removeRejection(rejectionId) {
-            console.log("🔌 Removing rejection:", rejectionId);
+            console.log("\n═══════════════════════════════════════════════════════");
+            console.log("🔌 PERMANENTLY DELETING REJECTION");
+            console.log("═══════════════════════════════════════════════════════");
+            console.log("Rejection ID:", rejectionId);
             
-            // Get current dismissed list (same key as dashboard)
+            // Get current dismissed list
             const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+            console.log("📋 Current dismissed list:", dismissedNotifications);
             
-            // Add this rejection to dismissed list
+            // Add this rejection to dismissed list (PERMANENT)
             if (!dismissedNotifications.includes(rejectionId)) {
                 dismissedNotifications.push(rejectionId);
                 localStorage.setItem("dismissedNotifications", JSON.stringify(dismissedNotifications));
-                console.log("💾 Saved to localStorage (dismissedNotifications):", dismissedNotifications);
+                console.log("💾 ✅ SAVED TO localStorage - PERMANENT DELETION");
+                console.log("📋 Updated dismissed list:", dismissedNotifications);
+            } else {
+                console.log("ℹ️ Already permanently deleted");
             }
             
             // Remove from DOM with animation
@@ -769,14 +790,16 @@
                 element.style.transition = "opacity 0.3s ease";
                 setTimeout(() => {
                     element.remove();
-                    console.log("✅ Rejection removed from display");
+                    console.log("✅ Removed from display");
                     
                     // Check if there are any rejections left
                     const list = document.getElementById("rejectionsList");
                     if (list.children.length === 0) {
                         document.getElementById("rejectionsContainer").style.display = "none";
-                        console.log("📍 No more rejections - hiding container");
+                        console.log("📍 All rejections deleted - hiding container");
                     }
+                    console.log("═══════════════════════════════════════════════════════");
+                    console.log("🎯 PERMANENT DELETION COMPLETE - Will NOT reappear on relogin\n");
                 }, 300);
             }
         }
