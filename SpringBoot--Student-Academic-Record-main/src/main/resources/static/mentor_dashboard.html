@@ -295,7 +295,7 @@
             <input type="text" id="studentUsn" placeholder="Student USN" class="input-field" style="max-width: 300px;">
             <textarea id="messageText" placeholder="Write your message here..." class="input-field"></textarea>
             <div style="display:flex; align-items:center; gap:15px;">
-                <button onclick="sendMessage()" class="btn">Send Message</button>
+                <button id="sendMsgBtn" onclick="sendMessage()" class="btn">Send Message</button>
                 <div id="msgStatus" style="font-size:12px;"></div>
             </div>
         </div>
@@ -379,37 +379,65 @@
     }
 
     async function sendMessage(){
-        const studentUsn = document.getElementById("studentUsn").value.trim();
-        const message = document.getElementById("messageText").value.trim();
+        const studentUsnInput = document.getElementById("studentUsn");
+        const messageInput = document.getElementById("messageText");
+        const sendBtn = document.getElementById("sendMsgBtn");
         const status = document.getElementById("msgStatus");
+        
+        const studentUsn = studentUsnInput.value.trim();
+        const message = messageInput.value.trim();
         
         if(!studentUsn || !message) { 
             status.innerHTML = "<span style='color:#f87171'>❌ Please fill all fields</span>"; 
             return; 
         }
 
+        // Disable button and show loading state
+        sendBtn.disabled = true;
+        sendBtn.style.opacity = "0.6";
+        sendBtn.style.cursor = "not-allowed";
+        const originalText = sendBtn.textContent;
+        sendBtn.textContent = "⏳ Sending...";
+        
+        // Clear the input immediately for visual feedback
+        messageInput.value = "";
+        status.innerHTML = "<span style='color:#94a3b8'>Sending...</span>";
+
         const payload = { studentUsn, message };
         console.log("📤 Sending message to student:", studentUsn);
         console.log("Message content:", message);
 
-        const res = await fetch("/api/messages/send",{
-            method:"POST",
-            credentials:"include",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(payload)
-        });
-        
-        console.log("Response status:", res.status);
-        const responseText = await res.text();
-        console.log("Response text:", responseText);
-        
-        if(res.ok) {
-            status.innerHTML = "<span style='color:#4ade80'>✔ Message sent successfully!</span>";
-            document.getElementById("studentUsn").value = "";
-            document.getElementById("messageText").value = "";
-            setTimeout(() => status.innerHTML = "", 3000);
-        } else {
-            status.innerHTML = "<span style='color:#f87171'>❌ Failed to send: " + responseText + "</span>";
+        try {
+            const res = await fetch("/api/messages/send",{
+                method:"POST",
+                credentials:"include",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(payload)
+            });
+            
+            console.log("Response status:", res.status);
+            const responseText = await res.text();
+            console.log("Response text:", responseText);
+            
+            if(res.ok) {
+                status.innerHTML = "<span style='color:#4ade80'>✅ Message sent successfully!</span>";
+                studentUsnInput.value = "";
+                messageInput.value = "";
+                setTimeout(() => status.innerHTML = "", 3000);
+            } else {
+                status.innerHTML = "<span style='color:#f87171'>❌ Failed to send: " + responseText + "</span>";
+                messageInput.value = message;  // Restore message if failed
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+            status.innerHTML = "<span style='color:#f87171'>❌ Error: " + error.message + "</span>";
+            messageInput.value = message;  // Restore message if error
+        } finally {
+            // Re-enable button
+            sendBtn.disabled = false;
+            sendBtn.style.opacity = "1";
+            sendBtn.style.cursor = "pointer";
+            sendBtn.textContent = originalText;
         }
     }
 
