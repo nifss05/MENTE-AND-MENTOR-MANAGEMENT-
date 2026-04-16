@@ -690,14 +690,14 @@
             const list = document.getElementById("rejectionsList");
             list.innerHTML = "";
 
-            // Get removed rejections from localStorage
-            const removedRejections = JSON.parse(localStorage.getItem("removedRejections") || "[]");
-            console.log("🗑️ Removed rejections from storage:", removedRejections);
+            // Get dismissed notifications from localStorage (same key as dashboard)
+            const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+            console.log("🗑️ Dismissed notifications from storage:", dismissedNotifications);
 
-            // Filter out removed rejections
+            // Filter out removed rejections using same ID format as dashboard
             const visibleRejections = rejections.filter(rejection => {
-                const rejectionId = rejection.certificateType + "_" + rejection.rejectedDate;
-                return !removedRejections.includes(rejectionId);
+                const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
+                return !dismissedNotifications.includes(rejectionId);
             });
 
             if (!visibleRejections || visibleRejections.length === 0) {
@@ -707,7 +707,7 @@
             }
 
             visibleRejections.forEach(rejection => {
-                const rejectionId = rejection.certificateType + "_" + rejection.rejectedDate;
+                const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
                 const item = document.createElement("div");
                 item.className = "rejection-item";
                 item.id = "rejection-" + rejectionId;
@@ -752,14 +752,14 @@
         function removeRejection(rejectionId) {
             console.log("🔌 Removing rejection:", rejectionId);
             
-            // Get current removed list
-            const removedRejections = JSON.parse(localStorage.getItem("removedRejections") || "[]");
+            // Get current dismissed list (same key as dashboard)
+            const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
             
-            // Add this rejection to removed list
-            if (!removedRejections.includes(rejectionId)) {
-                removedRejections.push(rejectionId);
-                localStorage.setItem("removedRejections", JSON.stringify(removedRejections));
-                console.log("💾 Saved to localStorage:", removedRejections);
+            // Add this rejection to dismissed list
+            if (!dismissedNotifications.includes(rejectionId)) {
+                dismissedNotifications.push(rejectionId);
+                localStorage.setItem("dismissedNotifications", JSON.stringify(dismissedNotifications));
+                console.log("💾 Saved to localStorage (dismissedNotifications):", dismissedNotifications);
             }
             
             // Remove from DOM with animation
@@ -778,6 +778,8 @@
                         console.log("📍 No more rejections - hiding container");
                     }
                 }, 300);
+            }
+        }
             }
         }
 
