@@ -246,8 +246,20 @@
       8: ["Project Phase II","Internship","Elective III","Seminar"]
     };
 
+    // ============================
+    // VALIDATION CONSTRAINTS
+    // ============================
+    const CONSTRAINTS = {
+        mse1: { max: 20, label: 'MSE 1' },
+        mse2: { max: 20, label: 'MSE 2' },
+        task: { max: 10, label: 'Task' },
+        see: { max: 50, label: 'SEE' },
+        total: { max: 100, label: 'Total' }
+    };
+
     let semesterValidated = false;
     let currentSem = null;
+    let draftMarks = {}; // Store draft marks for recovery
 
     function buildSemList(){
         const list = document.getElementById('semList');
@@ -262,6 +274,39 @@
         }
     }
     buildSemList();
+
+    function getStorageKey(sem) {
+        return `marks_sem_${sem}_draft`;
+    }
+
+    function saveDraftToLocalStorage(sem) {
+        if (!sem || semesterValidated) return;
+        const tbody = document.getElementById('marksTbody');
+        const rows = tbody.querySelectorAll('tr');
+        const draft = [];
+
+        rows.forEach((row, idx) => {
+            draft.push({
+                subject: semSubjects[sem][idx],
+                mse1: row.querySelector('.mse1').value || '',
+                mse2: row.querySelector('.mse2').value || '',
+                task: row.querySelector('.task').value || '',
+                see: row.querySelector('.see').value || ''
+            });
+        });
+
+        localStorage.setItem(getStorageKey(sem), JSON.stringify(draft));
+    }
+
+    function loadDraftFromLocalStorage(sem) {
+        const key = getStorageKey(sem);
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : null;
+    }
+
+    function clearDraftFromLocalStorage(sem) {
+        localStorage.removeItem(getStorageKey(sem));
+    }
 
     function openSemester(sem){
         currentSem = sem;
@@ -285,11 +330,11 @@
             <thead>
                 <tr>
                     <th>Subject</th>
-                    <th>MSE 1</th>
-                    <th>MSE 2</th>
-                    <th>Tasks</th>
-                    <th>SEE</th>
-                    <th>Total</th>
+                    <th title="Max 20">MSE 1</th>
+                    <th title="Max 20">MSE 2</th>
+                    <th title="Max 10">Tasks</th>
+                    <th title="Max 50">SEE</th>
+                    <th title="Max 100">Total</th>
                     <th>Grade</th>
                 </tr>
             </thead>
@@ -300,10 +345,30 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td style="text-align:left; padding-left:15px; font-weight:500">${sub}</td>
-                <td><input type="number" class="mse1" data-idx="${idx}"></td>
-                <td><input type="number" class="mse2" data-idx="${idx}"></td>
-                <td><input type="number" class="task" data-idx="${idx}"></td>
-                <td><input type="number" class="see" data-idx="${idx}"></td>
+                <td>
+                    <div class="input-wrapper" style="position: relative;">
+                        <input type="number" class="mse1" data-idx="${idx}" placeholder="0-20">
+                        <span class="error-tooltip" style="display:none"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-wrapper" style="position: relative;">
+                        <input type="number" class="mse2" data-idx="${idx}" placeholder="0-20">
+                        <span class="error-tooltip" style="display:none"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-wrapper" style="position: relative;">
+                        <input type="number" class="task" data-idx="${idx}" placeholder="0-10">
+                        <span class="error-tooltip" style="display:none"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-wrapper" style="position: relative;">
+                        <input type="number" class="see" data-idx="${idx}" placeholder="0-50">
+                        <span class="error-tooltip" style="display:none"></span>
+                    </div>
+                </td>
                 <td><input type="text" readonly class="total" data-idx="${idx}"></td>
                 <td><input type="text" readonly class="grade" data-idx="${idx}"></td>
             `;
@@ -312,18 +377,85 @@
 
         Array.from(document.querySelectorAll('#marksTable input[type="number"]')).forEach(inp => {
             inp.addEventListener('input', recalcRow);
+            inp.addEventListener('blur', () => saveDraftToLocalStorage(sem));
         });
+    }
+
+    function validateInput(value, fieldType) {
+        if (value === '' || value === null || value === undefined) return { valid: true };
+        
+        const numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue < 0) {
+            return { valid: false, message: 'Marks must be non-negative' };
+        }
+
+        const constraint = CONSTRAINTS[fieldType];
+        if (numValue > constraint.max) {
+            return { 
+                valid: false, 
+                message: `${constraint.label} should not exceed ${constraint.max}` 
+            };
+        }
+
+        return { valid: true };
     }
 
     function recalcRow(e){
         const row = e.target.closest('tr');
+        const inputWrapper = e.target.closest('.input-wrapper');
+        const errorTooltip = inputWrapper.querySelector('.error-tooltip');
+
+        // Determine field type
+        let fieldType = '';
+        if (e.target.classList.contains('mse1')) fieldType = 'mse1';
+        else if (e.target.classList.contains('mse2')) fieldType = 'mse2';
+        else if (e.target.classList.contains('task')) fieldType = 'task';
+        else if (e.target.classList.contains('see')) fieldType = 'see';
+
+        // Validate current input
+        const validation = validateInput(e.target.value, fieldType);
+        if (!validation.valid) {
+            errorTooltip.textContent = validation.message;
+            errorTooltip.style.display = 'block';
+            errorTooltip.style.position = 'absolute';
+            errorTooltip.style.top = '-28px';
+            errorTooltip.style.left = '0';
+            errorTooltip.style.whiteSpace = 'nowrap';
+            errorTooltip.style.background = 'var(--danger)';
+            errorTooltip.style.color = 'white';
+            errorTooltip.style.padding = '4px 8px';
+            errorTooltip.style.borderRadius = '4px';
+            errorTooltip.style.fontSize = '12px';
+            errorTooltip.style.zIndex = '10';
+            e.target.style.borderColor = 'var(--danger)';
+            e.target.style.borderWidth = '2px';
+        } else {
+            errorTooltip.style.display = 'none';
+            e.target.style.borderColor = 'var(--glass-border)';
+            e.target.style.borderWidth = '1px';
+        }
+
+        // Recalculate total
         const m1 = parseFloat(row.querySelector('.mse1').value) || 0;
         const m2 = parseFloat(row.querySelector('.mse2').value) || 0;
         const t = parseFloat(row.querySelector('.task').value) || 0;
         const s = parseFloat(row.querySelector('.see').value) || 0;
         const total = m1 + m2 + t + s;
+        
         row.querySelector('.total').value = total.toFixed(1);
         row.querySelector('.grade').value = computeGrade(total);
+
+        // Validate total
+        const totalValidation = validateInput(total, 'total');
+        if (!totalValidation.valid) {
+            const totalCell = row.querySelector('.total');
+            totalCell.style.color = 'var(--danger)';
+            totalCell.style.fontWeight = 'bold';
+        } else {
+            const totalCell = row.querySelector('.total');
+            totalCell.style.color = '#fff';
+            totalCell.style.fontWeight = '400';
+        }
     }
 
     function computeGrade(total){
@@ -333,6 +465,45 @@
         if(total >= 60) return 'C';
         if(total >= 50) return 'D';
         return 'F';
+    }
+
+    function validateAllMarks() {
+        const tbody = document.getElementById('marksTbody');
+        const rows = tbody.querySelectorAll('tr');
+        let allValid = true;
+        let errors = [];
+
+        rows.forEach((row, idx) => {
+            const mse1 = row.querySelector('.mse1').value;
+            const mse2 = row.querySelector('.mse2').value;
+            const task = row.querySelector('.task').value;
+            const see = row.querySelector('.see').value;
+            const subject = semSubjects[currentSem][idx];
+
+            // Check each field
+            ['mse1', 'mse2', 'task', 'see'].forEach(field => {
+                const value = row.querySelector('.' + field).value;
+                const validation = validateInput(value, field);
+                if (!validation.valid) {
+                    allValid = false;
+                    errors.push(`${subject} - ${validation.message}`);
+                }
+            });
+
+            // Check total
+            const m1 = parseFloat(mse1) || 0;
+            const m2 = parseFloat(mse2) || 0;
+            const t = parseFloat(task) || 0;
+            const s = parseFloat(see) || 0;
+            const total = m1 + m2 + t + s;
+
+            if (total > 100) {
+                allValid = false;
+                errors.push(`${subject} - Total marks should not exceed 100 (Current: ${total})`);
+            }
+        });
+
+        return { valid: allValid, errors };
     }
 
     function applyLockState(){
@@ -353,6 +524,21 @@
         }
     }
 
+    function applyRowLockState(row){
+        const status = row.dataset.status;
+        const validated = row.dataset.validated === 'true';
+        const inputs = row.querySelectorAll('input:not(.total):not(.grade)');
+        
+        // Allow editing if rejected or still pending
+        if (status === 'rejected' || status === 'pending' || !validated) {
+            inputs.forEach(i => i.removeAttribute('readonly'));
+            row.style.borderLeft = '4px solid var(--danger)';  // Red border for rejected
+        } else {
+            inputs.forEach(i => i.setAttribute('readonly', 'true'));
+            row.style.borderLeft = '4px solid var(--success)';  // Green border for approved
+        }
+    }
+
     async function loadMarksFromServer(sem){
         document.getElementById('historyText').textContent = 'Fetching records...';
         try {
@@ -360,14 +546,41 @@
             if (!res.ok) {
                 document.getElementById('historyText').textContent = 'No saved data found for this semester.';
                 semesterValidated = false;
+                
+                // Try to load draft from localStorage
+                const draft = loadDraftFromLocalStorage(sem);
+                if (draft) {
+                    document.getElementById('historyText').textContent = '📝 Loaded unsaved draft data';
+                    populateTableWithData(draft);
+                } else {
+                    document.getElementById('historyText').textContent = 'No saved data found for this semester.';
+                }
+                
                 applyLockState();
                 return;
             }
             const data = await res.json();
             if (data.subjects && data.subjects.length > 0) {
                 populateTableWithData(data.subjects);
-                semesterValidated = data.subjects[0].validated === true;
-                document.getElementById('historyText').textContent = semesterValidated ? "✅ Validated by mentor." : "⏳ Awaiting validation.";
+                
+                // Check if all marks are validated (approved)
+                const allApproved = data.subjects.every(s => s.validated === true && s.status !== 'rejected');
+                semesterValidated = allApproved;
+                
+                // Check if any marks are rejected
+                const hasRejected = data.subjects.some(s => s.status === 'rejected');
+                if (hasRejected) {
+                    document.getElementById('historyText').textContent = "⚠️ Some marks were rejected. Please edit and resubmit.";
+                } else if (semesterValidated) {
+                    document.getElementById('historyText').textContent = "✅ All marks validated by mentor.";
+                } else {
+                    document.getElementById('historyText').textContent = "⏳ Awaiting validation.";
+                }
+                
+                // Clear draft if marks were approved
+                if (semesterValidated) {
+                    clearDraftFromLocalStorage(sem);
+                }
             } else {
                 semesterValidated = false;
             }
@@ -388,11 +601,38 @@
             r.querySelector('.see').value = s.see ?? '';
             r.querySelector('.total').value = s.total ?? '';
             r.querySelector('.grade').value = s.grade ?? '';
+            
+            // Store status on row for later reference
+            r.dataset.status = s.status ?? 'pending';
+            r.dataset.validated = s.validated ?? false;
+            
+            // Apply row-level lock state based on status
+            applyRowLockState(r);
+            
+            // Trigger recalc to show any validation issues
+            Array.from(r.querySelectorAll('input[type="number"]')).forEach(inp => {
+                const event = new Event('input', { bubbles: true });
+                inp.dispatchEvent(event);
+            });
         });
     }
 
     async function saveMarks(){
         if(!currentSem || semesterValidated) return;
+
+        // Validate all marks first
+        const validation = validateAllMarks();
+        if (!validation.valid) {
+            const fb = document.getElementById('feedback');
+            fb.innerHTML = `<div style="color:var(--danger); margin-top:15px; padding:12px; border-radius:8px; background:rgba(239,68,68,0.1); border:1px solid var(--danger)">
+                <strong>❌ Validation Errors:</strong>
+                <ul style="margin:8px 0 0 0; padding-left:20px">
+                    ${validation.errors.map(e => `<li style="font-size:13px">${e}</li>`).join('')}
+                </ul>
+            </div>`;
+            return;
+        }
+
         const tbody = document.getElementById('marksTbody');
         const rows = tbody.querySelectorAll('tr');
         const payload = { semester: currentSem, subjects: [] };
@@ -418,14 +658,25 @@
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify(payload)
             });
+            
             if(res.ok){
-                fb.innerHTML = `<div style="color:var(--success)">Saved successfully!</div>`;
+                // Clear draft on successful save
+                clearDraftFromLocalStorage(currentSem);
+                fb.innerHTML = `<div style="color:var(--success); margin-top:15px; padding:12px; border-radius:8px; background:rgba(34,197,94,0.1); border:1px solid var(--success)">✅ Saved successfully! Awaiting mentor validation.</div>`;
                 loadMarksFromServer(currentSem);
             } else {
-                fb.innerHTML = `<div style="color:var(--danger)">Error saving data.</div>`;
+                const errorData = await res.json();
+                const errorMsg = errorData.message || 'Error saving data.';
+                fb.innerHTML = `<div style="color:var(--danger); margin-top:15px; padding:12px; border-radius:8px; background:rgba(239,68,68,0.1); border:1px solid var(--danger)">
+                    <strong>❌ ${errorMsg}</strong>
+                </div>`;
+                // Keep draft for recovery
+                saveDraftToLocalStorage(currentSem);
             }
         } catch(err){
             fb.innerHTML = `<div style="color:var(--danger)">Network error.</div>`;
+            // Keep draft for recovery
+            saveDraftToLocalStorage(currentSem);
         }
     }
 

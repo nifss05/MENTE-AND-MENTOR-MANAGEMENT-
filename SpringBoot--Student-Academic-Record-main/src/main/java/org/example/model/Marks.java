@@ -29,6 +29,10 @@ public class Marks {
     private Integer activityPoints;
     private Boolean validated = false;
 
+    // Status: pending, submitted, approved, rejected
+    @Column(columnDefinition = "VARCHAR(50) DEFAULT 'pending'")
+    private String status = "pending";
+
     // --- Getters and Setters ---
     public Long getMarkId() {
         return markId;
@@ -133,6 +137,14 @@ public class Marks {
     // Setter
     public void setMentorId(String mentorId) {
         this.mentorId = mentorId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }

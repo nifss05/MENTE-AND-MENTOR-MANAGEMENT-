@@ -1,0 +1,526 @@
+{
+  "mentors": [
+    {
+      "userId": 1,
+      "username": "mentor_cce",
+      "password": "password123",
+      "role": "MENTOR",
+      "name": "Dr. Rajesh Kumar",
+      "email": "rajesh.kumar@college.edu",
+      "department": "CSE",
+      "usn": "NNM22CC054"
+    },
+    {
+      "userId": 2,
+      "username": "mentor_ece",
+      "password": "password123",
+      "role": "MENTOR",
+      "name": "Dr. Priya Sharma",
+      "email": "priya.sharma@college.edu",
+      "department": "ECE",
+      "usn": "NNM22EC055"
+    }
+  ],
+  "students": [
+    {
+      "studentId": 1,
+      "userId": 3,
+      "username": "student001",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Aaryan Patel",
+      "usn": "NNM22CC001",
+      "email": "aaryan.patel@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-05-15"
+    },
+    {
+      "studentId": 2,
+      "userId": 4,
+      "username": "student002",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Bhavna Singh",
+      "usn": "NNM22CC002",
+      "email": "bhavna.singh@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-08-22"
+    },
+    {
+      "studentId": 3,
+      "userId": 5,
+      "username": "student003",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Chetan Verma",
+      "usn": "NNM22CC003",
+      "email": "chetan.verma@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-03-10"
+    },
+    {
+      "studentId": 4,
+      "userId": 6,
+      "username": "student004",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Divya Nair",
+      "usn": "NNM22CC004",
+      "email": "divya.nair@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-12-08"
+    },
+    {
+      "studentId": 5,
+      "userId": 7,
+      "username": "student005",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Esha Gupta",
+      "usn": "NNM22CC005",
+      "email": "esha.gupta@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-07-19"
+    },
+    {
+      "studentId": 6,
+      "userId": 8,
+      "username": "student006",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Farhan Khan",
+      "usn": "NNM22CC006",
+      "email": "farhan.khan@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-01-25"
+    },
+    {
+      "studentId": 7,
+      "userId": 9,
+      "username": "student007",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Gauri Desai",
+      "usn": "NNM22CC007",
+      "email": "gauri.desai@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-06-11"
+    },
+    {
+      "studentId": 8,
+      "userId": 10,
+      "username": "student008",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Harsh Malhotra",
+      "usn": "NNM22CC008",
+      "email": "harsh.malhotra@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-09-30"
+    },
+    {
+      "studentId": 9,
+      "userId": 11,
+      "username": "student009",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Ishita Sinha",
+      "usn": "NNM22CC009",
+      "email": "ishita.sinha@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-02-14"
+    },
+    {
+      "studentId": 10,
+      "userId": 12,
+      "username": "student010",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Jaideep Roy",
+      "usn": "NNM22CC010",
+      "email": "jaideep.roy@student.edu",
+      "department": "CSE",
+      "academicYear": 3,
+      "mentorId": "NNM22CC054",
+      "mentorName": "Dr. Rajesh Kumar",
+      "dob": "2004-04-20"
+    },
+    {
+      "studentId": 11,
+      "userId": 13,
+      "username": "student011",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Kamala Reddy",
+      "usn": "NNM22EC001",
+      "email": "kamala.reddy@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-10-05"
+    },
+    {
+      "studentId": 12,
+      "userId": 14,
+      "username": "student012",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Lakshya Agarwal",
+      "usn": "NNM22EC002",
+      "email": "lakshya.agarwal@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-11-12"
+    },
+    {
+      "studentId": 13,
+      "userId": 15,
+      "username": "student013",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Megha Trivedi",
+      "usn": "NNM22EC003",
+      "email": "megha.trivedi@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-01-18"
+    },
+    {
+      "studentId": 14,
+      "userId": 16,
+      "username": "student014",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Nitin Chopra",
+      "usn": "NNM22EC004",
+      "email": "nitin.chopra@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-05-28"
+    },
+    {
+      "studentId": 15,
+      "userId": 17,
+      "username": "student015",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Oona Patel",
+      "usn": "NNM22EC005",
+      "email": "oona.patel@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-08-09"
+    },
+    {
+      "studentId": 16,
+      "userId": 18,
+      "username": "student016",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Pallavi Joshi",
+      "usn": "NNM22EC006",
+      "email": "pallavi.joshi@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-03-22"
+    },
+    {
+      "studentId": 17,
+      "userId": 19,
+      "username": "student017",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Quinn Bhat",
+      "usn": "NNM22EC007",
+      "email": "quinn.bhat@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-07-14"
+    },
+    {
+      "studentId": 18,
+      "userId": 20,
+      "username": "student018",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Riya Kapoor",
+      "usn": "NNM22EC008",
+      "email": "riya.kapoor@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-12-03"
+    },
+    {
+      "studentId": 19,
+      "userId": 21,
+      "username": "student019",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Sanjay Menon",
+      "usn": "NNM22EC009",
+      "email": "sanjay.menon@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-04-17"
+    },
+    {
+      "studentId": 20,
+      "userId": 22,
+      "username": "student020",
+      "password": "password123",
+      "role": "STUDENT",
+      "name": "Tanya Saxena",
+      "usn": "NNM22EC010",
+      "email": "tanya.saxena@student.edu",
+      "department": "ECE",
+      "academicYear": 3,
+      "mentorId": "NNM22EC055",
+      "mentorName": "Dr. Priya Sharma",
+      "dob": "2004-09-26"
+    }
+  ],
+  "marks": [
+    {
+      "markId": 1,
+      "studentUsn": "NNM22CC001",
+      "semester": 5,
+      "totalMarks": 85,
+      "validated": true
+    },
+    {
+      "markId": 2,
+      "studentUsn": "NNM22CC001",
+      "semester": 6,
+      "totalMarks": 88,
+      "validated": false
+    },
+    {
+      "markId": 3,
+      "studentUsn": "NNM22CC002",
+      "semester": 5,
+      "totalMarks": 92,
+      "validated": true
+    },
+    {
+      "markId": 4,
+      "studentUsn": "NNM22CC002",
+      "semester": 6,
+      "totalMarks": 90,
+      "validated": true
+    },
+    {
+      "markId": 5,
+      "studentUsn": "NNM22CC003",
+      "semester": 5,
+      "totalMarks": 78,
+      "validated": false
+    },
+    {
+      "markId": 6,
+      "studentUsn": "NNM22CC003",
+      "semester": 6,
+      "totalMarks": 81,
+      "validated": false
+    },
+    {
+      "markId": 7,
+      "studentUsn": "NNM22CC004",
+      "semester": 5,
+      "totalMarks": 95,
+      "validated": true
+    },
+    {
+      "markId": 8,
+      "studentUsn": "NNM22CC004",
+      "semester": 6,
+      "totalMarks": 93,
+      "validated": true
+    },
+    {
+      "markId": 9,
+      "studentUsn": "NNM22CC005",
+      "semester": 5,
+      "totalMarks": 87,
+      "validated": true
+    },
+    {
+      "markId": 10,
+      "studentUsn": "NNM22CC005",
+      "semester": 6,
+      "totalMarks": 89,
+      "validated": false
+    },
+    {
+      "markId": 11,
+      "studentUsn": "NNM22EC001",
+      "semester": 5,
+      "totalMarks": 84,
+      "validated": true
+    },
+    {
+      "markId": 12,
+      "studentUsn": "NNM22EC001",
+      "semester": 6,
+      "totalMarks": 86,
+      "validated": true
+    },
+    {
+      "markId": 13,
+      "studentUsn": "NNM22EC002",
+      "semester": 5,
+      "totalMarks": 91,
+      "validated": true
+    },
+    {
+      "markId": 14,
+      "studentUsn": "NNM22EC002",
+      "semester": 6,
+      "totalMarks": 89,
+      "validated": false
+    },
+    {
+      "markId": 15,
+      "studentUsn": "NNM22EC003",
+      "semester": 5,
+      "totalMarks": 79,
+      "validated": false
+    },
+    {
+      "markId": 16,
+      "studentUsn": "NNM22EC003",
+      "semester": 6,
+      "totalMarks": 82,
+      "validated": false
+    }
+  ],
+  "certificates": [
+    {
+      "certId": 1,
+      "studentUsn": "NNM22CC001",
+      "title": "AWS Certified Solutions Architect",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 2,
+      "studentUsn": "NNM22CC001",
+      "title": "Google Cloud Associate Cloud Engineer",
+      "status": "PENDING"
+    },
+    {
+      "certId": 3,
+      "studentUsn": "NNM22CC002",
+      "title": "Microsoft Azure Administrator",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 4,
+      "studentUsn": "NNM22CC003",
+      "title": "Kubernetes Application Developer",
+      "status": "REJECTED"
+    },
+    {
+      "certId": 5,
+      "studentUsn": "NNM22CC003",
+      "title": "Docker Certified Associate",
+      "status": "PENDING"
+    },
+    {
+      "certId": 6,
+      "studentUsn": "NNM22CC004",
+      "title": "Java Spring Framework Professional",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 7,
+      "studentUsn": "NNM22CC004",
+      "title": "AWS Certified Developer",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 8,
+      "studentUsn": "NNM22CC005",
+      "title": "Python Data Science Professional",
+      "status": "PENDING"
+    },
+    {
+      "certId": 9,
+      "studentUsn": "NNM22EC001",
+      "title": "VLSI Design Fundamentals",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 10,
+      "studentUsn": "NNM22EC001",
+      "title": "Embedded Systems Professional",
+      "status": "PENDING"
+    },
+    {
+      "certId": 11,
+      "studentUsn": "NNM22EC002",
+      "title": "Digital Signal Processing Expert",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 12,
+      "studentUsn": "NNM22EC003",
+      "title": "Microcontroller Programming",
+      "status": "REJECTED"
+    },
+    {
+      "certId": 13,
+      "studentUsn": "NNM22EC004",
+      "title": "IoT Solutions Developer",
+      "status": "APPROVED"
+    },
+    {
+      "certId": 14,
+      "studentUsn": "NNM22EC004",
+      "title": "RF Engineering Professional",
+      "status": "PENDING"
+    }
+  ]
+}

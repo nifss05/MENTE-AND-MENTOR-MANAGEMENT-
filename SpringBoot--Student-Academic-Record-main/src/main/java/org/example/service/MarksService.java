@@ -2,13 +2,13 @@ package org.example.service;
 
 import jakarta.transaction.Transactional;
 import org.example.dto.MarksRequest;
+import org.example.dto.SubjectMarks;
 import org.example.model.Marks;
 import org.example.model.Student;
 import org.example.repository.MarksRepository;
 import org.example.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.example.repository.StudentRepository;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,6 +37,11 @@ public class MarksService {
             throw new IllegalStateException("Student mentor not assigned");
         }
         request.getSubjects().forEach(s -> {
+            // ============================
+            // VALIDATE MARKS CONSTRAINTS
+            // ============================
+            validateMarksConstraints(s);
+
             Marks m = new Marks();
             m.setStudentUsn(usn);
             m.setSemester(request.getSemester());
@@ -50,9 +55,51 @@ public class MarksService {
             m.setValidated(false);
             m.setActivityPoints(0);
             m.setMentorId(student.getMentorId());
+            m.setStatus("submitted"); // Set initial status to submitted
 
             marksRepository.save(m);
         });
+    }
+
+    // ============================
+    // VALIDATE MARKS CONSTRAINTS
+    // ============================
+    private void validateMarksConstraints(SubjectMarks s) {
+        StringBuilder errors = new StringBuilder();
+
+        // Validate MSE1 (max 20)
+        if (s.getMse1() != null && s.getMse1() > 20) {
+            errors.append("MSE 1 should not exceed 20. ");
+        }
+        // Validate MSE2 (max 20)
+        if (s.getMse2() != null && s.getMse2() > 20) {
+            errors.append("MSE 2 should not exceed 20. ");
+        }
+        // Validate Task (max 10)
+        if (s.getTask() != null && s.getTask() > 10) {
+            errors.append("Task score should not exceed 10. ");
+        }
+        // Validate SEE (max 50)
+        if (s.getSee() != null && s.getSee() > 50) {
+            errors.append("SEE score should not exceed 50. ");
+        }
+
+        // Validate Total (max 100, which is MSE1+MSE2+Task+SEE = 20+20+10+50 = 100)
+        int mse1 = s.getMse1() != null ? s.getMse1() : 0;
+        int mse2 = s.getMse2() != null ? s.getMse2() : 0;
+        int task = s.getTask() != null ? s.getTask() : 0;
+        int see = s.getSee() != null ? s.getSee() : 0;
+        int total = mse1 + mse2 + task + see;
+
+        if (total > 100) {
+            errors.append("Total marks should not exceed 100. ");
+        }
+
+        // Throw exception if any validation failed
+        if (errors.length() > 0) {
+            throw new IllegalArgumentException(
+                    "Invalid marks for subject '" + s.getName() + "': " + errors.toString().trim());
+        }
     }
 
     // ============================

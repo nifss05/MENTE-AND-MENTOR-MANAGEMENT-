@@ -272,13 +272,13 @@ button:not(.delete-btn):not(.back-btn):hover {
 
       <div class="date-row">
         <div class="form-group">
-          <label>From <span style="color: #ff6b6b; font-size: 12px;\">(No future dates)</span></label>
+          <label>From</label>
           <input type="date" id="fromDate">
           <div id="fromDateError" style="color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none;">⚠️ Please select a date on or before today</div>
         </div>
 
         <div class="form-group">
-          <label>To <span style="color: #ff6b6b; font-size: 12px;\">(No future dates)</span></label>
+          <label>To </label>
           <input type="date" id="toDate">
           <div id="toDateError" style="color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none;">⚠️ Please select a date on or before today</div>
         </div>
@@ -303,8 +303,7 @@ function setMaxDate(inputId) {
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const dd = String(today.getDate()).padStart(2, '0');
-  const maxDate = `${yyyy}-${mm}-${dd}`;
-  dateInput.max = maxDate;
+  dateInput.max = yyyy + '-' + mm + '-' + dd;
 }
 
 function validateDateNotInFuture(dateInput, errorElement) {
@@ -314,16 +313,11 @@ function validateDateNotInFuture(dateInput, errorElement) {
   today.setHours(0, 0, 0, 0);
   selectedDate.setHours(0, 0, 0, 0);
   if (selectedDate > today) {
-    if (errorElement) {
-      errorElement.style.display = 'block';
-    }
+    if (errorElement) errorElement.style.display = 'block';
     return false;
-  } else {
-    if (errorElement) {
-      errorElement.style.display = 'none';
-    }
-    return true;
   }
+  if (errorElement) errorElement.style.display = 'none';
+  return true;
 }
 
 function validateDateRange() {
@@ -332,9 +326,7 @@ function validateDateRange() {
   if (fromDate && toDate) {
     const from = new Date(fromDate);
     const to = new Date(toDate);
-    if (to < from) {
-      return false;
-    }
+    if (to < from) return false;
   }
   return true;
 }
@@ -416,24 +408,19 @@ async function loadAchievements() {
     list.innerHTML = "<div class='muted'>No achievements yet!</div>";
     return;
   }
-  list.innerHTML = data.map(a => `
-    <div class="achievement">
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div>
-          <h4>${a.title}</h4>
-          <div class="muted"><strong>Category:</strong> ${a.category || 'Other'}</div>
-          <div class="muted">${a.fromDate || ''} ${a.toDate ? '– ' + a.toDate : ''}</div>
-          <div style="margin-top:10px; color:#e2e8f0; font-size:14px;">${a.description || ''}</div>
-        </div>
-        <button class="delete-btn" onclick="deleteAchievement(${a.id})">Delete</button>
-      </div>
-    </div>
-  `).join('');
+  let html = '';
+  for (let a of data) {
+    const dateRange = a.fromDate ? (a.toDate ? a.fromDate + ' – ' + a.toDate : a.fromDate) : '';
+    const category = a.category || 'Other';
+    const description = a.description || '';
+    html += '<div class="achievement"><div style="display:flex;justify-content:space-between;align-items:start"><div><h4>' + a.title + '</h4><div class="muted"><strong>Category:</strong> ' + category + '</div><div class="muted">' + dateRange + '</div><div style="margin-top:10px; color:#e2e8f0; font-size:14px;">' + description + '</div></div><button class="delete-btn" onclick="deleteAchievement(' + a.id + ')">Delete</button></div></div>';
+  }
+  list.innerHTML = html;
 }
 
 async function deleteAchievement(id) {
   if (!confirm("Delete?")) return;
-  await fetch(`/api/student/achievements/${id}`, {
+  await fetch('/api/student/achievements/' + id, {
     method: "DELETE",
     credentials: "include"
   });
@@ -442,8 +429,5 @@ async function deleteAchievement(id) {
 
 loadAchievements();
 </script>
-
-
 </body>
-
 </html>

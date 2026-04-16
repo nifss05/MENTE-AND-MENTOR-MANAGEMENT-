@@ -2,239 +2,317 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentor Analytics</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-
-        body{
-          font-family: Inter, Arial;
-          background:#f4f7fb;
-          margin:0;
+        :root {
+            --bg: #0a0e27;
+            --card-bg: #ffffff;
+            --accent: #667eea;
+            --accent-hover: #764ba2;
+            --text-main: #1a2a4a;
         }
 
-        .container{
-          max-width:1100px;
-          margin:40px auto;
-          padding:0 20px;
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: #fff;
         }
 
-        h2{
-          margin-bottom:20px;
+        /* Starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 50px 50px, #ddd, rgba(0, 0, 0, 0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0, 0, 0, 0)),
+                radial-gradient(2px 2px at 90px 10px, #eee, rgba(0, 0, 0, 0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 1;
         }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        body > * { position: relative; z-index: 2; }
+
+        /* Topbar */
+        .topbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: rgba(10, 14, 39, 0.8);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--accent-hover);
+            transform: translateX(5px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h2 { margin-bottom: 30px; font-weight: 700; font-size: 28px; }
 
         /* Semester Tabs */
-
-        .tabs{
-          display:flex;
-          gap:10px;
-          margin-bottom:25px;
-          flex-wrap:wrap;
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .tab{
-          padding:8px 16px;
-          border-radius:8px;
-          background:#e2e8f0;
-          cursor:pointer;
-          font-weight:600;
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            font-weight: 600;
+            color: #ccc;
+            transition: all 0.3s;
         }
 
-        .tab.active{
-          background:#2563eb;
-          color:white;
+        .tab:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         /* Grid Layout */
-
-        .grid{
-          display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-          gap:30px;
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
         }
 
-        .card{
-          background:white;
-          padding:25px;
-          border-radius:12px;
-          box-shadow:0 8px 28px rgba(0,0,0,0.08);
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: transform 0.3s ease;
         }
 
-        canvas{
-          max-height:300px;
+        .card:hover { transform: translateY(-5px); }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
         }
 
-        .back-link {
-          display: inline-block;
-          margin-bottom: 20px;
-          padding: 10px 16px;
-          background: #6b7280;
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 600;
+        canvas {
+            width: 100% !important;
+            max-height: 300px;
         }
 
-        .back-link:hover {
-          background: #4b5563;
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
         }
-
     </style>
 </head>
-
 <body>
 
+<div class="topbar">
+    <div class="brand">
+        <div class="logo">M</div>
+        Mentor Analytics
+    </div>
+    <button class="back-btn" onclick="location.href='mentor_dashboard.html'">← Back</button>
+</div>
+
 <div class="container">
-    <a href="mentor_dashboard.html" class="back-link">← Back</a>
+    <h2>Performance Overview</h2>
 
-    <h2>Mentor Analytics</h2>
-
-    <!-- Semester Tabs -->
     <div class="tabs" id="semesterTabs"></div>
 
     <div class="grid">
-
         <div class="card">
-            <h3>Student Performance</h3>
+            <h3>Student Performance Distribution</h3>
             <canvas id="performanceChart"></canvas>
         </div>
 
         <div class="card">
-            <h3>Subject Strength</h3>
+            <h3>Average Subject Scores</h3>
             <canvas id="subjectChart"></canvas>
         </div>
 
         <div class="card">
-            <h3>Certificate Activity</h3>
+            <h3>Certificate Verification Status</h3>
             <canvas id="certificateChart"></canvas>
         </div>
-
     </div>
-
 </div>
 
 <script>
+    let performanceChart, subjectChart, certificateChart;
+    let currentSemester = 1;
 
-    let performanceChart;
-    let subjectChart;
-    let certificateChart;
+    // Build Tabs
+    function createSemesterTabs() {
+        const container = document.getElementById("semesterTabs");
+        for (let i = 1; i <= 8; i++) {
+            const tab = document.createElement("div");
+            tab.className = "tab" + (i === 1 ? " active" : "");
+            tab.innerText = "Semester " + i;
+            tab.onclick = () => {
+                document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+                currentSemester = i;
+                loadAnalytics();
+            };
+            container.appendChild(tab);
+        }
+    }
 
-    let currentSemester = "";
+    async function loadAnalytics() {
+        try {
+            const res = await fetch(`/api/mentor/analytics?semester=${currentSemester}`, {
+                credentials: 'include'
+            });
+            const data = await res.json();
+            renderCharts(data);
+        } catch (err) {
+            console.error("Failed to load analytics:", err);
+        }
+    }
 
-    /* Create Semester Tabs */
+    function renderCharts(data) {
+        if (performanceChart) performanceChart.destroy();
+        if (subjectChart) subjectChart.destroy();
+        if (certificateChart) certificateChart.destroy();
 
-    function createSemesterTabs(){
-
-      const container = document.getElementById("semesterTabs");
-
-      for(let i=1;i<=8;i++){
-
-        const tab = document.createElement("div");
-        tab.className = "tab";
-        tab.innerText = "Sem " + i;
-
-        tab.onclick = () => {
-          document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-          tab.classList.add("active");
-
-          currentSemester = i;
-          loadAnalytics();
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
         };
 
-        container.appendChild(tab);
+        // 1. Performance Pie Chart
+        performanceChart = new Chart(document.getElementById('performanceChart'), {
+            type: 'pie',
+            data: {
+                labels: ['High (>80%)', 'Average (50-80%)', 'Low (<50%)'],
+                datasets: [{
+                    data: [data.high || 0, data.average || 0, data.low || 0],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: chartOptions
+        });
 
-        if(i===1){
-          tab.classList.add("active");
-          currentSemester = 1;
-        }
-      }
+        // 2. Subject Bar Chart
+        subjectChart = new Chart(document.getElementById('subjectChart'), {
+            type: 'bar',
+            data: {
+                labels: data.subjects || [],
+                datasets: [{
+                    label: 'Avg Marks',
+                    data: data.marks || [],
+                    backgroundColor: '#667eea',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                ...chartOptions,
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                }
+            }
+        });
 
+        // 3. Certificate Doughnut Chart
+        certificateChart = new Chart(document.getElementById('certificateChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [
+                        data.certApproved || 0, 
+                        data.certPending || 0, 
+                        data.certRejected || 0
+                    ],
+                    backgroundColor: ['#22c55e', '#3b82f6', '#dc2626'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                ...chartOptions,
+                cutout: '60%'
+            }
+        });
     }
 
-    /* Load Analytics */
-
-    async function loadAnalytics(){
-
-      const res = await fetch(`/api/mentor/analytics?semester=${currentSemester}`,{
-        credentials:'include'
-      });
-
-      const data = await res.json();
-console.log("FULL DATA:", data);
-console.log("Rendering charts with:", data);
-      renderCharts(data);
-
-    }
-
-    /* Render Charts */
-
-    function renderCharts(data){
-
-      if(performanceChart) performanceChart.destroy();
-      if(subjectChart) subjectChart.destroy();
-      if(certificateChart) certificateChart.destroy();
-
-      // Performance Chart
-     performanceChart = new Chart(
-  document.getElementById('performanceChart').getContext('2d'),
-  {
-    type:'pie',
-    data:{
-      labels:['High','Average','Low'],
-      datasets:[{
-        data:[
-          data.high || 0,
-          data.average || 0,
-          data.low || 0
-        ]
-      }]
-    }
-  }
-);
-
-      // Subject Chart
-      subjectChart = new Chart(
-       document.getElementById('subjectChart').getContext('2d'),
-        {
-          type:'bar',
-          data:{
-            labels:data.subjects,
-            datasets:[{
-              label:'Average Marks',
-              data:data.marks
-            }]
-          }
-        }
-      );
-
-      // Certificate Chart
-      certificateChart = new Chart(
-        document.getElementById('certificateChart').getContext('2d')
-        ,
-        {
-          type:'doughnut',
-          data:{
-            labels:['Approved','Pending','Rejected'],
-            datasets:[{
-              data:[
-                data.certApproved,
-                data.certPending,
-                data.certRejected
-              ]
-            }]
-          }
-        }
-      );
-
-    }
-
-    /* Init */
-
+    // Init
     createSemesterTabs();
     loadAnalytics();
-
 </script>
 
 </body>

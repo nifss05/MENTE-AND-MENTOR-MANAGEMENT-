@@ -133,6 +133,31 @@ label {
   font-size: 14px;
 }
 
+.activity-info {
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--accent);
+  display: none;
+}
+
+.activity-info.show {
+  display: block;
+}
+
+.activity-info p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+.activity-info .points {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
 select, input {
   width: 100%;
   padding: 12px;
@@ -144,6 +169,16 @@ select, input {
   font-size: 14px;
   font-family: inherit;
   transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1.5em;
+  padding-right: 2.5rem;
 }
 
 select:focus, input:focus {
@@ -203,15 +238,17 @@ input[type="file"] {
 <div class="card">
   <h2>Certificate Details</h2>
 
-  <label>Certificate Type</label>
-  <select id="type">
-    <option value="NSS">NSS</option>
-    <option value="Sports">Sports</option>
-    <option value="Workshop">Workshop</option>
-    <option value="Internship">Internship</option>
+  <label>AICTE Based Activity <span style="color: var(--accent);">*</span></label>
+  <select id="activitySlNo" onchange="updateActivityInfo()">
+    <option value="">-- Loading activities... --</option>
   </select>
 
-  <label>Certificate Image</label>
+  <div id="activityInfo" class="activity-info">
+    <p><strong>Activity:</strong> <span id="activityDetail"></span></p>
+    <p><strong>Activity Points:</strong> <span class="points" id="activityPoints">0</span></p>
+  </div>
+
+  <label>Certificate Image <span style="color: var(--accent);">*</span></label>
   <input type="file" id="file" accept="image/*" onchange="previewImage()">
   
   <img id="preview" alt="Certificate Preview">
@@ -220,47 +257,158 @@ input[type="file"] {
 </div>
 
 <script>
-async function upload() {
-  const fileInput = document.getElementById("file");
-  if (!fileInput.files.length) {
-    alert("Please select a certificate image");
-    return;
-  }
+// ============================
+// ACTIVITY DATA STORAGE
+// ============================
+let activitiesData = {};
 
-  const formData = new FormData();
-  formData.append("certificateType",
-      document.getElementById("type").value);
-  formData.append("file", fileInput.files[0]);
+// ============================
+// INITIALIZE ON PAGE LOAD
+// ============================
+document.addEventListener('DOMContentLoaded', () => {
+    loadActivities();
+});
 
-  try {
-    const res = await fetch("/api/student/certificate/upload", {
-      method: "POST",
-      body: formData,
-      credentials: "include"   // 🔴 THIS WAS MISSING
-    });
-
-    const resultText = await res.text();
-    alert(resultText);
+// ============================
+// LOAD ACTIVITIES FROM SERVER
+// ============================
+async function loadActivities() {
+    const dropdown = document.getElementById("activitySlNo");
     
-    if(res.ok) {
-        window.location.href = "student_certificates.html"; 
+    try {
+        console.log("📡 Fetching activities from /api/student/activities...");
+        
+        const res = await fetch("/api/student/activities", {
+            credentials: "include"
+        });
+        
+        console.log("📊 Response status:", res.status);
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        console.log("✅ Activities loaded successfully:", data);
+
+        if (!data.activities || data.activities.length === 0) {
+            console.error("❌ No activities in response");
+            dropdown.innerHTML = '<option value="">-- No activities available --</option>';
+            alert("No activities found. Please contact admin.");
+            return;
+        }
+
+        console.log(`✅ Adding ${data.activities.length} activities to dropdown`);
+        
+        // Keep the placeholder option
+        dropdown.innerHTML = '<option value="">-- Select an Activity --</option>';
+        
+        data.activities.forEach((activity, index) => {
+            console.log(`Adding activity ${index + 1}: ${activity.displayText}`);
+            activitiesData[activity.slNo] = activity;
+            const option = document.createElement("option");
+            option.value = activity.slNo;
+            option.textContent = activity.displayText;
+            dropdown.appendChild(option);
+        });
+        
+        console.log(`✅ Total activities in dropdown: ${dropdown.options.length - 1}`);
+        
+    } catch (error) {
+        console.error("❌ Error loading activities:", error);
+        dropdown.innerHTML = '<option value="">-- Error loading activities --</option>';
+        alert(`Failed to load activity list: ${error.message}\n\nPlease check your connection and refresh the page.`);
     }
-  } catch (error) {
-    alert("Upload failed. Please try again.");
-  }
 }
 
+// ============================
+// UPDATE ACTIVITY INFORMATION
+// ============================
+function updateActivityInfo() {
+    const dropdown = document.getElementById("activitySlNo");
+    const selectedSlNo = dropdown.value;
+    const activityInfo = document.getElementById("activityInfo");
+    
+    if (!selectedSlNo) {
+        activityInfo.classList.remove("show");
+        return;
+    }
+
+    const activity = activitiesData[selectedSlNo];
+    if (activity) {
+        document.getElementById("activityDetail").textContent = activity.detail;
+        document.getElementById("activityPoints").textContent = activity.points + " pts";
+        activityInfo.classList.add("show");
+    } else {
+        activityInfo.classList.remove("show");
+    }
+}
+
+// ============================
+// UPLOAD CERTIFICATE
+// ============================
+async function upload() {
+    const activitySlNo = document.getElementById("activitySlNo").value;
+    const fileInput = document.getElementById("file");
+
+    if (!activitySlNo) {
+        alert("Please select an activity from the dropdown");
+        return;
+    }
+
+    if (!fileInput.files.length) {
+        alert("Please select a certificate image");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("activitySlNo", activitySlNo);
+    formData.append("file", fileInput.files[0]);
+
+    try {
+        const uploadBtn = document.querySelector(".upload-btn");
+        uploadBtn.textContent = "Uploading...";
+        uploadBtn.disabled = true;
+
+        const res = await fetch("/api/student/certificate/upload", {
+            method: "POST",
+            body: formData,
+            credentials: "include"
+        });
+
+        const resultData = await res.json();
+        
+        if (res.ok) {
+            alert(`✅ Certificate uploaded successfully!\n\nActivity: ${resultData.activityDetail}\nPoints Awarded: ${resultData.points}`);
+            window.location.href = "student_certificates.html"; 
+        } else {
+            alert(`❌ Upload failed: ${resultData.message || 'Unknown error'}`);
+            uploadBtn.textContent = "Upload Now";
+            uploadBtn.disabled = false;
+        }
+    } catch (error) {
+        console.error("Upload error:", error);
+        alert("Upload failed. Please try again.");
+        const uploadBtn = document.querySelector(".upload-btn");
+        uploadBtn.textContent = "Upload Now";
+        uploadBtn.disabled = false;
+    }
+}
+
+// ============================
+// PREVIEW IMAGE
+// ============================
 function previewImage() {
     const fileInput = document.getElementById("file");
     const preview = document.getElementById("preview");
 
     if (fileInput.files && fileInput.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        preview.src = e.target.result;
-        preview.style.display = "block";
-      };
-      reader.readAsDataURL(fileInput.files[0]);
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+        };
+        reader.readAsDataURL(fileInput.files[0]);
     }
 }
 </script>

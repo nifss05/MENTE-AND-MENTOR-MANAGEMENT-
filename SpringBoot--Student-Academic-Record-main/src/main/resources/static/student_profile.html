@@ -547,7 +547,7 @@
                             <input type="text" id="editDepartment" required>
                         </div>
                         <div class="form-group">
-                            <label>Date of Birth <span style="color: #ff6b6b; font-size: 12px;\">(No future dates)</span></label>
+                            <label>Date of Birth </label>
                             <input type="date" id="editDob" required>
                             <div id="dobEditError" style="color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none;">⚠️ Please select a date on or before today</div>
                         </div>
@@ -573,250 +573,244 @@
             </div>
         </div>
 
-        <div id="rejectionsContainer" class="card rejections-section" style="display: none; margin-top: 30px; border: 2px solid #f8d7da; background: #f8f9fa;">
-            <h3 style="margin: 0 0 20px 0; color:#721c24;">⚠️ Certificate Rejections</h3>
+        <div id="rejectionsContainer" class="card rejections-section">
+            <h3 style="margin: 0 0 20px 0; color: rgb(114, 28, 36);">Certificate Rejections</h3>
             <div id="rejectionsList"></div>
         </div>
     </div>
 
     <script>
-        let editMode = false;
+let editMode = false;
 
-        function setMaxDate(inputId) {
-            const dateInput = document.getElementById(inputId);
-            if (!dateInput) return;
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const maxDate = `${yyyy}-${mm}-${dd}`;
-            dateInput.max = maxDate;
-            console.log(`📅 Date field '${inputId}' max date set to: ${maxDate}`);
-        }
+function setMaxDate(inputId) {
+    const dateInput = document.getElementById(inputId);
+    if (!dateInput) return;
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.max = yyyy + '-' + mm + '-' + dd;
+}
 
-        function validateDateNotInFuture(dateInput, errorElement) {
-            const selectedDate = new Date(dateInput.value);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            selectedDate.setHours(0, 0, 0, 0);
-            if (selectedDate > today) {
-                if (errorElement) {
-                    errorElement.style.display = 'block';
-                    console.warn(`❌ Invalid date: ${dateInput.value} is in the future`);
-                }
-                return false;
-            } else {
-                if (errorElement) {
-                    errorElement.style.display = 'none';
-                }
-                return true;
-            }
-        }
+function validateDateNotInFuture(dateInput, errorElement) {
+    const selectedDate = new Date(dateInput.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+    if (selectedDate > today) {
+        if (errorElement) errorElement.style.display = 'block';
+        return false;
+    }
+    if (errorElement) errorElement.style.display = 'none';
+    return true;
+}
 
-        function toggleEditMode() {
-            editMode = !editMode;
-            document.getElementById("viewMode").classList.toggle("hidden");
-            document.getElementById("editMode").classList.toggle("hidden");
-            document.getElementById("editToggleBtn").textContent = editMode ? "Cancel" : "Edit Profile";
-            if (editMode) {
-                setMaxDate('editDob');
-                const dobInput = document.getElementById('editDob');
-                if (dobInput) {
-                    dobInput.addEventListener('change', function() {
-                        validateDateNotInFuture(this, document.getElementById('dobEditError'));
-                    });
-                    dobInput.addEventListener('blur', function() {
-                        validateDateNotInFuture(this, document.getElementById('dobEditError'));
-                    });
-                }
-                document.getElementById("editName").focus();
-            }
-        }
-
-        function cancelEdit() {
-            editMode = false;
-            document.getElementById("viewMode").classList.remove("hidden");
-            document.getElementById("editMode").classList.add("hidden");
-            document.getElementById("editToggleBtn").textContent = "Edit Profile";
-        }
-
-        async function loadProfile() {
-            const res = await fetch('/api/student/me', {
-                credentials: 'include'
+function toggleEditMode() {
+    editMode = !editMode;
+    document.getElementById("viewMode").classList.toggle("hidden");
+    document.getElementById("editMode").classList.toggle("hidden");
+    document.getElementById("editToggleBtn").textContent = editMode ? "Cancel" : "Edit Profile";
+    if (editMode) {
+        setMaxDate('editDob');
+        const dobInput = document.getElementById('editDob');
+        if (dobInput) {
+            dobInput.addEventListener('change', function() {
+                validateDateNotInFuture(this, document.getElementById('dobEditError'));
             });
-            if (!res.ok) {
-                alert("Unauthorized");
-                window.location = "index.html";
-                return;
-            }
+            dobInput.addEventListener('blur', function() {
+                validateDateNotInFuture(this, document.getElementById('dobEditError'));
+            });
+        }
+        document.getElementById("editName").focus();
+    }
+}
+
+function cancelEdit() {
+    editMode = false;
+    document.getElementById("viewMode").classList.remove("hidden");
+    document.getElementById("editMode").classList.add("hidden");
+    document.getElementById("editToggleBtn").textContent = "Edit Profile";
+}
+
+async function loadProfile() {
+    const res = await fetch('/api/student/me', {
+        credentials: 'include'
+    });
+    if (!res.ok) {
+        alert("Unauthorized");
+        window.location = "index.html";
+        return;
+    }
+    const data = await res.json();
+    document.getElementById("viewName").textContent = data.name || "-";
+    document.getElementById("viewUsn").textContent = data.usn || "-";
+    document.getElementById("viewEmail").textContent = data.email || "-";
+    document.getElementById("viewDepartment").textContent = data.department || "-";
+    document.getElementById("viewDob").textContent = formatDate(data.dob) || "-";
+    document.getElementById("viewYear").textContent = data.academicYear || "-";
+    document.getElementById("viewMentorName").textContent = data.mentorName || "-";
+    document.getElementById("viewMentorId").textContent = data.mentorId || "-";
+    document.getElementById("editName").value = data.name || "";
+    document.getElementById("editUsn").value = data.usn || "";
+    document.getElementById("editEmail").value = data.email || "";
+    document.getElementById("editDepartment").value = data.department || "";
+    document.getElementById("editDob").value = data.dob || "";
+    document.getElementById("editYear").value = data.academicYear || "";
+    document.getElementById("editMentorName").value = data.mentorName || "";
+    document.getElementById("editMentorId").value = data.mentorId || "";
+    loadActivityPoints();
+    loadRejections();
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+async function loadActivityPoints() {
+    try {
+        const res = await fetch('/api/student/activity-points', {
+            credentials: 'include'
+        });
+        if (res.ok) {
             const data = await res.json();
-            document.getElementById("viewName").textContent = data.name || "-";
-            document.getElementById("viewUsn").textContent = data.usn || "-";
-            document.getElementById("viewEmail").textContent = data.email || "-";
-            document.getElementById("viewDepartment").textContent = data.department || "-";
-            document.getElementById("viewDob").textContent = formatDate(data.dob) || "-";
-            document.getElementById("viewYear").textContent = data.academicYear || "-";
-            document.getElementById("viewMentorName").textContent = data.mentorName || "-";
-            document.getElementById("viewMentorId").textContent = data.mentorId || "-";
-            document.getElementById("editName").value = data.name || "";
-            document.getElementById("editUsn").value = data.usn || "";
-            document.getElementById("editEmail").value = data.email || "";
-            document.getElementById("editDepartment").value = data.department || "";
-            document.getElementById("editDob").value = data.dob || "";
-            document.getElementById("editYear").value = data.academicYear || "";
-            document.getElementById("editMentorName").value = data.mentorName || "";
-            document.getElementById("editMentorId").value = data.mentorId || "";
-            loadActivityPoints();
-            loadRejections();
+            document.getElementById("totalActivityScore").textContent = data.totalPoints || 0;
         }
+    } catch (err) {
+        console.error("Error:", err);
+    }
+}
 
-        function formatDate(dateStr) {
-            if (!dateStr) return "-";
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        async function loadActivityPoints() {
-            try {
-                const res = await fetch('/api/student/activity-points', {
-                    credentials: 'include'
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    document.getElementById("totalActivityScore").textContent = data.totalPoints || 0;
-                }
-            } catch (err) {
-                console.error("Error:", err);
-            }
-        }
-
-        async function loadRejections() {
-            try {
-                const res = await fetch('/api/student/certificate-rejections', {
-                    credentials: 'include'
-                });
-                if (res.ok) {
-                    const rejections = await res.json();
-                    if (rejections && rejections.length > 0) {
-                        displayRejections(rejections);
-                    } else {
-                        document.getElementById("rejectionsContainer").style.display = "none";
-                    }
-                } else {
-                    document.getElementById("rejectionsContainer").style.display = "none";
-                }
-            } catch (err) {
-                console.error("Error:", err);
-            }
-        }
-
-        function displayRejections(rejections) {
-            const container = document.getElementById("rejectionsContainer");
-            const list = document.getElementById("rejectionsList");
-            list.innerHTML = "";
-            const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
-            const visibleRejections = rejections.filter(rejection => {
-                const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
-                return !dismissedNotifications.includes(rejectionId);
-            });
-            if (!visibleRejections || visibleRejections.length === 0) {
-                container.style.display = "none";
-                return;
-            }
-            visibleRejections.forEach(rejection => {
-                const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
-                const item = document.createElement("div");
-                item.className = "rejection-item";
-                item.id = "rejection-" + rejectionId;
-                item.style.display = "flex";
-                item.style.justifyContent = "space-between";
-                item.style.alignItems = "flex-start";
-                item.style.gap = "10px";
-                const contentDiv = document.createElement("div");
-                contentDiv.style.flex = "1";
-                contentDiv.innerHTML = `
-                    <div class="rejection-title">❌ ${rejection.certificateType} - Rejected</div>
-                    <div>Rejected on: ${formatDate(rejection.rejectedDate)}</div>
-                    ${rejection.rejectionNote ? `<div class="rejection-note"><strong>Mentor's Note:</strong><br>${rejection.rejectionNote}</div>` : ""}
-                `;
-                const removeBtn = document.createElement("button");
-                removeBtn.textContent = "✕";
-                removeBtn.style.background = "#dc3545";
-                removeBtn.style.color = "white";
-                removeBtn.style.border = "none";
-                removeBtn.style.borderRadius = "4px";
-                removeBtn.style.padding = "5px 10px";
-                removeBtn.style.cursor = "pointer";
-                removeBtn.style.fontSize = "16px";
-                removeBtn.style.marginTop = "5px";
-                removeBtn.title = "Remove permanently";
-                removeBtn.onclick = function() {
-                    removeRejection(rejectionId);
-                };
-                item.appendChild(contentDiv);
-                item.appendChild(removeBtn);
-                list.appendChild(item);
-            });
-            container.style.display = "block";
-        }
-
-        function removeRejection(rejectionId) {
-            const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
-            if (!dismissedNotifications.includes(rejectionId)) {
-                dismissedNotifications.push(rejectionId);
-                localStorage.setItem("dismissedNotifications", JSON.stringify(dismissedNotifications));
-            }
-            const element = document.getElementById("rejection-" + rejectionId);
-            if (element) {
-                element.style.opacity = "0";
-                element.style.transition = "opacity 0.3s ease";
-                setTimeout(() => {
-                    element.remove();
-                    const list = document.getElementById("rejectionsList");
-                    if (list.children.length === 0) {
-                        document.getElementById("rejectionsContainer").style.display = "none";
-                    }
-                }, 300);
-            }
-        }
-
-        window.addEventListener("DOMContentLoaded", function() {
-            loadProfile();
+async function loadRejections() {
+    try {
+        const res = await fetch('/api/student/certificate-rejections', {
+            credentials: 'include'
         });
-
-        document.getElementById("profileForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const dobInput = document.getElementById("editDob");
-            if (!validateDateNotInFuture(dobInput, document.getElementById('dobEditError'))) {
-                alert("Date cannot be in the future!");
-                dobInput.focus();
-                return;
-            }
-            const payload = {
-                name: document.getElementById("editName").value.trim(),
-                department: document.getElementById("editDepartment").value.trim(),
-                academicYear: parseInt(document.getElementById("editYear").value),
-                dob: document.getElementById("editDob").value
-            };
-            const res = await fetch('/api/student/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert("Updated!");
-                cancelEdit();
-                loadProfile();
+        if (res.ok) {
+            const rejections = await res.json();
+            if (rejections && rejections.length > 0) {
+                displayRejections(rejections);
             } else {
-                alert(await res.text());
+                document.getElementById("rejectionsContainer").style.display = "none";
             }
+        } else {
+            document.getElementById("rejectionsContainer").style.display = "none";
+        }
+    } catch (err) {
+        console.error("Error:", err);
+    }
+}
+
+function displayRejections(rejections) {
+    const container = document.getElementById("rejectionsContainer");
+    const list = document.getElementById("rejectionsList");
+    list.innerHTML = "";
+    const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+    const visibleRejections = rejections.filter(rejection => {
+        const rejectionId = 'rejected_' + rejection.certificateType + '_' + rejection.rejectedDate;
+        return !dismissedNotifications.includes(rejectionId);
+    });
+    if (!visibleRejections || visibleRejections.length === 0) {
+        container.style.display = "none";
+        return;
+    }
+    visibleRejections.forEach(rejection => {
+        const rejectionId = 'rejected_' + rejection.certificateType + '_' + rejection.rejectedDate;
+        const item = document.createElement("div");
+        item.className = "rejection-item";
+        item.id = "rejection-" + rejectionId;
+        item.style.display = "flex";
+        item.style.justifyContent = "space-between";
+        item.style.alignItems = "flex-start";
+        item.style.gap = "10px";
+        const contentDiv = document.createElement("div");
+        contentDiv.style.flex = "1";
+        let noteHtml = '';
+        if (rejection.rejectionNote) {
+            noteHtml = '<div class="rejection-note"><strong>Mentor\'s Note:</strong><br>' + rejection.rejectionNote + '</div>';
+        }
+        const rejectionTitle = '❌ ' + rejection.certificateType + ' - Rejected';
+        const rejectionDate = 'Rejected on: ' + formatDate(rejection.rejectedDate);
+        contentDiv.innerHTML = '<div class="rejection-title">' + rejectionTitle + '</div><div>' + rejectionDate + '</div>' + noteHtml;
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "✕";
+        removeBtn.style.background = "#dc3545";
+        removeBtn.style.color = "white";
+        removeBtn.style.border = "none";
+        removeBtn.style.borderRadius = "4px";
+        removeBtn.style.padding = "5px 10px";
+        removeBtn.style.cursor = "pointer";
+        removeBtn.style.fontSize = "16px";
+        removeBtn.style.marginTop = "5px";
+        removeBtn.title = "Remove permanently";
+        removeBtn.onclick = function() {
+            removeRejection(rejectionId);
+        };
+        item.appendChild(contentDiv);
+        item.appendChild(removeBtn);
+        list.appendChild(item);
+    });
+    container.style.display = "block";
+}
+
+function removeRejection(rejectionId) {
+    const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
+    if (!dismissedNotifications.includes(rejectionId)) {
+        dismissedNotifications.push(rejectionId);
+        localStorage.setItem("dismissedNotifications", JSON.stringify(dismissedNotifications));
+    }
+    const element = document.getElementById("rejection-" + rejectionId);
+    if (element) {
+        element.style.opacity = "0";
+        element.style.transition = "opacity 0.3s ease";
+        setTimeout(function() {
+            element.remove();
+            const list = document.getElementById("rejectionsList");
+            if (list.children.length === 0) {
+                document.getElementById("rejectionsContainer").style.display = "none";
+            }
+        }, 300);
+    }
+}
+
+window.addEventListener("DOMContentLoaded", function() {
+    loadProfile();
+});
+
+const profileForm = document.getElementById("profileForm");
+if (profileForm) {
+    profileForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const dobInput = document.getElementById("editDob");
+        if (!validateDateNotInFuture(dobInput, document.getElementById('dobEditError'))) {
+            alert("Date cannot be in the future!");
+            dobInput.focus();
+            return;
+        }
+        const payload = {
+            name: document.getElementById("editName").value.trim(),
+            department: document.getElementById("editDepartment").value.trim(),
+            academicYear: parseInt(document.getElementById("editYear").value),
+            dob: document.getElementById("editDob").value
+        };
+        const res = await fetch('/api/student/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
         });
+        if (res.ok) {
+            alert("Updated!");
+            cancelEdit();
+            loadProfile();
+        } else {
+            alert(await res.text());
+        }
+    });
+}
 
-        loadProfile();
+loadProfile();
     </script>
-
-
 </body>
-
 </html>

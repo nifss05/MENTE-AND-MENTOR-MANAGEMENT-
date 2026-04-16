@@ -17,9 +17,25 @@
     </style>
 </head>
 <body>
+<div class="topbar" style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px; background:rgba(102,126,234,0.1); border-bottom:1px solid rgba(102,126,234,0.2); margin-bottom:30px; border-radius:8px 8px 0 0;">
+    <div class="brand" style="color:white; font-weight:bold; font-size:18px;">Mentor Setup</div>
+    <button onclick="logout()" style="padding:8px 16px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">Logout</button>
+</div>
+
 <div class="container">
     <h2>Mentor Setup</h2>
-    <form id="mentorSetupForm">
+    
+    <div id="loadingMessage" class="loading" style="color:#666; text-align:center;">
+        Verifying your session...
+    </div>
+    
+    <div id="errorMessage" class="error-message" style="display:none; background:#fee2e2; color:#991b1b; padding:12px; border-radius:6px; margin-bottom:20px; border:1px solid #fecaca;">
+        <strong>Error:</strong> <span id="errorText"></span>
+        <br><br>
+        <a href="index.html" style="color: inherit; font-weight: bold;">Back to Login</a>
+    </div>
+    
+    <form id="mentorSetupForm" style="display:none;">
         <input id="name" placeholder="Full Name" required>
         <input id="email" type="email" placeholder="Email" required>
         <input id="department" placeholder="Department (e.g. CSE)" required>
@@ -28,6 +44,42 @@
 </div>
 
 <script>
+    function logout() {
+        fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+            .then(() => window.location = "index.html")
+            .catch(err => window.location = "index.html");
+    }
+
+    // Verify mentor session on page load
+    window.addEventListener('load', async () => {
+        try {
+            const res = await fetch('/api/mentor/me', { credentials: 'include' });
+            
+            if (!res.ok) {
+                document.getElementById("loadingMessage").style.display = "none";
+                document.getElementById("errorMessage").style.display = "block";
+                document.getElementById("errorText").textContent = "You must be logged in as a mentor to access this page.";
+                return;
+            }
+            
+            const user = await res.json();
+            
+            // Populate pre-filled fields if data exists
+            if (user.name) document.getElementById("name").value = user.name;
+            if (user.email) document.getElementById("email").value = user.email;
+            if (user.department) document.getElementById("department").value = user.department;
+            
+            // Show form, hide loading
+            document.getElementById("loadingMessage").style.display = "none";
+            document.getElementById("mentorSetupForm").style.display = "block";
+        } catch (err) {
+            console.error("Session check failed:", err);
+            document.getElementById("loadingMessage").style.display = "none";
+            document.getElementById("errorMessage").style.display = "block";
+            document.getElementById("errorText").textContent = "Failed to connect to server.";
+        }
+    });
+
     document.getElementById("mentorSetupForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 

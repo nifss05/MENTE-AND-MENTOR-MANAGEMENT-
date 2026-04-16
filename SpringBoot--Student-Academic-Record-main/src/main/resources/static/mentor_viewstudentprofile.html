@@ -201,9 +201,26 @@
         if(!studentId) return;
 
         try {
+            console.log("Loading profile for student:", studentId);
             const res = await fetch(`/api/mentor/student/${studentId}`, { credentials:"include" });
+            
+            console.log("Response status:", res.status);
+            console.log("Response ok:", res.ok);
+            
             const data = await res.json();
+            console.log("Response data:", data);
+            
+            if (!res.ok) {
+                console.error("Backend returned error:", data);
+                document.getElementById("profileArea").innerHTML = `<div style="padding: 40px; color: #f87171;"><strong>Error:</strong> ${data.message || data.error || 'Failed to load profile'}</div>`;
+                return;
+            }
+            
             const student = data.student;
+            if (!student) {
+                console.error("Student object missing from response:", data);
+                throw new Error("Invalid response: student object not found");
+            }
 
             document.getElementById("name").innerText = student.name;
             document.getElementById("usn").innerText = student.usn;
@@ -222,7 +239,7 @@
 
             document.getElementById("certTable").innerHTML = data.certificates.map(c=>`
                 <tr>
-                    <td style="color:white;">${c.title ?? "-"}</td>
+                    <td style="color:white;">${c.certificateType ?? "-"}</td>
                     <td><span class="${c.status === 'APPROVED' ? 'status-approved':'status-pending'}">
                         ${c.status ?? "PENDING"}
                     </span></td>

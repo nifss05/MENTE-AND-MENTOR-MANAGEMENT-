@@ -22,6 +22,8 @@ public class Certificate {
 	private String filePath;
 
 	private Integer activityPoints;
+	private Integer activitySlNo; // Serial number from AICTE activity list
+	private String activityDetail; // Human-readable activity description
 	private String status; // PENDING / APPROVED / REJECTED
 
 	private String validatedBy;
@@ -128,5 +130,21 @@ public class Certificate {
 
 	public void setRejectedDate(LocalDateTime rejectedDate) {
 		this.rejectedDate = rejectedDate;
+	}
+
+	public Integer getActivitySlNo() {
+		return activitySlNo;
+	}
+
+	public void setActivitySlNo(Integer activitySlNo) {
+		this.activitySlNo = activitySlNo;
+	}
+
+	public String getActivityDetail() {
+		return activityDetail;
+	}
+
+	public void setActivityDetail(String activityDetail) {
+		this.activityDetail = activityDetail;
 	}
 }

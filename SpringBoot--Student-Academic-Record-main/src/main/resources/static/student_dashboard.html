@@ -347,27 +347,48 @@
 
     async function loadMessages(){
         const res=await fetch("/api/messages/student",{credentials:"include"});
-        const data=await res.json();
         const list=document.getElementById("messagesList");
         const readMessages=JSON.parse(localStorage.getItem("readMessages")) || [];
+        
+        // Add debugging
+        console.log("📨 Fetching messages from /api/messages/student");
+        console.log("Response status:", res.status);
+        
+        if(!res.ok) {
+            console.error("❌ Failed to fetch messages. Status:", res.status);
+            list.innerHTML = "<p style='color: #f87171;'>Error loading messages</p>";
+            return;
+        }
+        
+        const data=await res.json();
+        console.log("📬 Messages received:", data);
+        console.log("Number of messages:", Array.isArray(data) ? data.length : 0);
+        
         list.innerHTML="";
         
-        if(!data || data.length === 0) {
-            list.innerHTML = "<p style='color: #a0aec0; text-align: center;'>No unread messages</p>";
+        if(!data || !Array.isArray(data) || data.length === 0) {
+            console.log("✅ No messages found");
+            list.innerHTML = "<p style='color: #a0aec0; text-align: center;'>No messages yet</p>";
             return;
         }
         
         data.forEach(m=>{
-            if(readMessages.includes(m.id)) return;
+            console.log("Processing message:", m);
+            if(readMessages.includes(m.id)) {
+                console.log("⏭️  Skipping already-read message ID:", m.id);
+                return;
+            }
+            
             const div=document.createElement("div");
             div.className="message";
             div.id=`msg-${m.id}`;
             
             const messageText = document.createElement("p");
-            messageText.textContent = m.message;
+            messageText.textContent = m.message || "(Empty message)";
             
             const timeText = document.createElement("small");
-            timeText.textContent = m.createdAt;
+            const createdAt = new Date(m.createdAt).toLocaleString();
+            timeText.textContent = createdAt || "Unknown time";
             
             div.appendChild(messageText);
             div.appendChild(timeText);

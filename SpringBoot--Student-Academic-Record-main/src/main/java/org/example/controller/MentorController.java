@@ -190,31 +190,66 @@ public class MentorController {
                 .body((Resource) resource);
     }
 
-    @GetMapping("/student/{id}")
-    public Map<String, Object> getStudentProfile(@PathVariable Long id, HttpSession session) {
+    @GetMapping("/student/{usn}")
+    public ResponseEntity<?> getStudentProfile(@PathVariable String usn, HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
 
-        User user = (User) session.getAttribute("user");
+            if (user == null || !"MENTOR".equalsIgnoreCase(user.getRole())) {
+                return ResponseEntity.status(401).body(new HashMap<String, String>() {
+                    {
+                        put("error", "Unauthorized: Not a mentor");
+                    }
+                });
+            }
 
-        if (user == null || !"MENTOR".equalsIgnoreCase(user.getRole())) {
-            throw new RuntimeException("Unauthorized");
+            Student student = studentRepository.findByUsn(usn);
+
+            if (student == null) {
+                return ResponseEntity.status(404).body(new HashMap<String, String>() {
+                    {
+                        put("error", "Student not found with USN: " + usn);
+                    }
+                });
+            }
+
+            // Verify that the mentor can only view their own students
+            String mentorUsn = user.getUsn();
+            String studentMentorId = student.getMentorId();
+
+            System.out.println("DEBUG: Mentor USN from session: " + mentorUsn);
+            System.out.println("DEBUG: Student MentorId from DB: " + studentMentorId);
+            System.out.println("DEBUG: Are they equal (case-insensitive)? "
+                    + (mentorUsn != null && mentorUsn.equalsIgnoreCase(studentMentorId)));
+
+            if (mentorUsn == null || !mentorUsn.equalsIgnoreCase(studentMentorId)) {
+                return ResponseEntity.status(403).body(new HashMap<String, String>() {
+                    {
+                        put("error", "Unauthorized: Student not assigned to this mentor. Mentor USN: " + mentorUsn
+                                + ", Student Mentor ID: " + studentMentorId);
+                    }
+                });
+            }
+
+            List<Marks> marks = marksRepository.findByStudentUsn(usn);
+            List<Certificate> certs = certificateRepository.findByStudentUsn(usn);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("student", student);
+            response.put("marks", marks != null ? marks : new ArrayList<>());
+            response.put("certificates", certs != null ? certs : new ArrayList<>());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("ERROR in getStudentProfile: " + e.getMessage());
+            return ResponseEntity.status(500).body(new HashMap<String, String>() {
+                {
+                    put("error", "Internal server error: " + e.getMessage());
+                    put("exception", e.getClass().getName());
+                }
+            });
         }
-
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        String usn = student.getUsn();
-
-        List<Marks> marks = marksRepository.findByStudentUsn(usn);
-
-        List<Certificate> certs = certificateRepository.findByStudentUsn(usn);
-
-        Map<String, Object> response = new HashMap<>();
-
-        response.put("student", student);
-        response.put("marks", marks);
-        response.put("certificates", certs);
-
-        return response;
     }
 
     @GetMapping("/monitor")
@@ -422,6 +457,32 @@ public class MentorController {
         certificateRepository.save(cert);
 
         return ResponseEntity.ok("Certificate rejected");
+    }
+
+    // ===============================
+    // GET MENTEE CERTIFICATE REJECTIONS
+    // ===============================
+    @GetMapping("/mentee-certificate-rejections")
+    public ResponseEntity<?> getMenteeCertificateRejections(HttpSession session) {
+        User mentor = (User) session.getAttribute("user");
+
+        if (mentor == null || !"MENTOR".equalsIgnoreCase(mentor.getRole())) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        // Get all students assigned to this mentor
+        List<Student> students = studentRepository.findByMentorId(mentor.getUsn());
+
+        // Get all rejected certificates from these students
+        List<Certificate> rejectedCerts = new ArrayList<>();
+        for (Student student : students) {
+            List<Certificate> certs = certificateRepository.findByStudentUsnAndStatus(
+                    student.getUsn(),
+                    CertificateStatus.REJECTED);
+            rejectedCerts.addAll(certs);
+        }
+
+        return ResponseEntity.ok(rejectedCerts);
     }
 
 }

@@ -306,21 +306,35 @@
         }
 
         function validateDateNotInFuture(dateInput, errorElement) {
-            const selectedDate = new Date(dateInput.value);
+            const dateValue = dateInput.value.trim();
+            
+            if (!dateValue) {
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                    errorElement.textContent = "⚠️ Date of Birth is required";
+                }
+                console.error("❌ Date field is empty");
+                return false;
+            }
+            
+            const selectedDate = new Date(dateValue + 'T00:00:00');
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            selectedDate.setHours(0, 0, 0, 0);
+            
+            console.log(`📅 Validation check - Selected: ${dateValue}, Today: ${today.toISOString().split('T')[0]}`);
             
             if (selectedDate > today) {
                 if (errorElement) {
                     errorElement.style.display = 'block';
-                    console.warn(`❌ Invalid date: ${dateInput.value} is in the future`);
+                    errorElement.textContent = "⚠️ Date of Birth cannot be in the future";
+                    console.warn(`❌ Invalid date: ${dateValue} is in the future`);
                 }
                 return false;
             } else {
                 if (errorElement) {
                     errorElement.style.display = 'none';
                 }
+                console.log(`✅ Valid date: ${dateValue}`);
                 return true;
             }
         }

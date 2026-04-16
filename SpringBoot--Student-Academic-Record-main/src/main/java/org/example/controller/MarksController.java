@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+
 @RestController
 @RequestMapping("/api/marks")
 public class MarksController {
@@ -37,8 +38,7 @@ public class MarksController {
         Student student = studentRepository.findByUserId(user.getUserId());
 
         return ResponseEntity.ok(
-                marksService.getMarksForSemester(student.getUsn(), sem)
-        );
+                marksService.getMarksForSemester(student.getUsn(), sem));
     }
 
     @PostMapping
@@ -53,11 +53,25 @@ public class MarksController {
 
         Student student = studentRepository.findByUserId(user.getUserId());
 
-        marksService.saveOrUpdateMarks(
-                student.getUsn(),
-                request
-        );
-
-        return ResponseEntity.ok("Marks saved successfully");
+        try {
+            marksService.saveOrUpdateMarks(
+                    student.getUsn(),
+                    request);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Marks saved successfully",
+                    "status", "success"));
+        } catch (IllegalArgumentException e) {
+            // Return validation error with 400 Bad Request
+            return ResponseEntity.status(400).body(Map.of(
+                    "message", e.getMessage(),
+                    "status", "error",
+                    "errorType", "VALIDATION_ERROR"));
+        } catch (Exception e) {
+            // Return general error with 500 Internal Server Error
+            return ResponseEntity.status(500).body(Map.of(
+                    "message", "Error saving marks: " + e.getMessage(),
+                    "status", "error",
+                    "errorType", "SERVER_ERROR"));
+        }
     }
 }

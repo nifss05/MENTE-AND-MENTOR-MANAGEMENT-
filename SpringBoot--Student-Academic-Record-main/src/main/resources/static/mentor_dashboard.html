@@ -379,18 +379,38 @@
     }
 
     async function sendMessage(){
-        const studentUsn = document.getElementById("studentUsn").value;
-        const message = document.getElementById("messageText").value;
+        const studentUsn = document.getElementById("studentUsn").value.trim();
+        const message = document.getElementById("messageText").value.trim();
         const status = document.getElementById("msgStatus");
-        if(!studentUsn || !message) { status.innerHTML = "Please fill all fields"; return; }
+        
+        if(!studentUsn || !message) { 
+            status.innerHTML = "<span style='color:#f87171'>❌ Please fill all fields</span>"; 
+            return; 
+        }
+
+        const payload = { studentUsn, message };
+        console.log("📤 Sending message to student:", studentUsn);
+        console.log("Message content:", message);
 
         const res = await fetch("/api/messages/send",{
             method:"POST",
             credentials:"include",
             headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({ studentUsn, message })
+            body:JSON.stringify(payload)
         });
-        status.innerHTML = res.ok ? "<span style='color:#4ade80'>✔ Message sent</span>" : "<span style='color:#f87171'>✘ Failed to send</span>";
+        
+        console.log("Response status:", res.status);
+        const responseText = await res.text();
+        console.log("Response text:", responseText);
+        
+        if(res.ok) {
+            status.innerHTML = "<span style='color:#4ade80'>✔ Message sent successfully!</span>";
+            document.getElementById("studentUsn").value = "";
+            document.getElementById("messageText").value = "";
+            setTimeout(() => status.innerHTML = "", 3000);
+        } else {
+            status.innerHTML = "<span style='color:#f87171'>❌ Failed to send: " + responseText + "</span>";
+        }
     }
 
     async function logout() {

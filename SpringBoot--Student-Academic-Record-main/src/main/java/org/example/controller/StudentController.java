@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.example.constants.ActivityPoints;
 import org.example.model.Certificate;
 import org.example.model.Student;
 import org.example.model.User;
@@ -39,10 +40,15 @@ public class StudentController {
             return ResponseEntity.badRequest().body(Map.of("valid", false, "message", "Mentor ID is required"));
         }
 
-        User mentor = userRepository.findByUsn(mentorId);
+        // Convert to uppercase for case-insensitive lookup (USNs are stored in
+        // uppercase)
+        String mentorIdUpper = mentorId.toUpperCase().trim();
+
+        User mentor = userRepository.findByUsn(mentorIdUpper);
 
         if (mentor == null) {
-            return ResponseEntity.ok(Map.of("valid", false, "message", "Mentor not found"));
+            System.err.println("DEBUG: Mentor not found for ID: " + mentorId + " (searched as: " + mentorIdUpper + ")");
+            return ResponseEntity.ok(Map.of("valid", false, "message", "Mentor not found. Please check the USN."));
         }
 
         if (!"MENTOR".equalsIgnoreCase(mentor.getRole())) {
@@ -202,9 +208,45 @@ public class StudentController {
     @Autowired
     private CertificateRepository certificateRepository;
 
+    // ===============================
+    // GET AICTE ACTIVITY LIST
+    // ===============================
+    @GetMapping("/activities")
+    public ResponseEntity<?> getActivities() {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            List<Map<String, Object>> activities = new java.util.ArrayList<>();
+
+            // Sort by slNo to ensure consistent order
+            ActivityPoints.getAllActivities().entrySet().stream()
+                    .sorted(java.util.Map.Entry.comparingByKey())
+                    .forEach(entry -> {
+                        ActivityPoints.ActivityMapping activity = entry.getValue();
+                        Map<String, Object> activityMap = new HashMap<>();
+                        activityMap.put("slNo", activity.getSlNo());
+                        activityMap.put("detail", activity.getActivityDetail());
+                        activityMap.put("points", activity.getPoints());
+                        activityMap.put("displayText", activity.getDisplayText());
+                        activities.add(activityMap);
+                    });
+
+            response.put("activities", activities);
+            response.put("total", activities.size());
+
+            System.out.println("✅ Activities endpoint called - returning " + activities.size() + " activities");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error in activities endpoint: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "Failed to load activities",
+                    "message", e.getMessage()));
+        }
+    }
+
     @PostMapping(value = "/certificate/upload", consumes = "multipart/form-data")
     public ResponseEntity<?> uploadCertificate(
-            @RequestParam("certificateType") String type,
+            @RequestParam("activitySlNo") Integer activitySlNo,
             @RequestParam("file") MultipartFile file,
             HttpSession session) {
 
@@ -231,6 +273,12 @@ public class StudentController {
                 return ResponseEntity.badRequest().body("No file selected");
             }
 
+            // Validate activity exists
+            ActivityPoints.ActivityMapping activity = ActivityPoints.getActivityBySlNo(activitySlNo);
+            if (activity == null) {
+                return ResponseEntity.badRequest().body("Invalid activity selected");
+            }
+
             // ===== FILE SAVE =====
             String uploadDir = System.getProperty("user.dir") + "/uploads/";
             new File(uploadDir).mkdirs();
@@ -243,30 +291,28 @@ public class StudentController {
             Certificate cert = new Certificate();
             cert.setStudentUsn(student.getUsn());
             cert.setMentorId(student.getMentorId());
-            cert.setCertificateType(type);
+            cert.setActivitySlNo(activitySlNo);
+            cert.setActivityDetail(activity.getActivityDetail());
+            cert.setCertificateType(activity.getActivityDetail()); // Store activity detail as certificate type
             cert.setFilePath("uploads/" + fileName);
-            cert.setActivityPoints(calculatePoints(type));
+            cert.setActivityPoints(activity.getPoints());
             cert.setStatus("PENDING");
 
             certificateRepository.save(cert);
 
-            return ResponseEntity.ok("Certificate uploaded successfully");
+            return ResponseEntity.ok(Map.of(
+                    "message", "Certificate uploaded successfully",
+                    "status", "success",
+                    "activityDetail", activity.getActivityDetail(),
+                    "points", activity.getPoints()));
 
         } catch (Exception e) {
-            e.printStackTrace(); // 👈 IMPORTANT FOR DEBUG
-            return ResponseEntity.status(500).body("Server error during upload");
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                    "message", "Server error during upload: " + e.getMessage(),
+                    "status", "error"));
         }
 
-    }
-
-    private int calculatePoints(String type) {
-        return switch (type) {
-            case "NSS" -> 10;
-            case "Sports" -> 15;
-            case "Workshop" -> 5;
-            case "Internship" -> 20;
-            default -> 0;
-        };
     }
 
     // ===============================

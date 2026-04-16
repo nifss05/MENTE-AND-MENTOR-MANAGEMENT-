@@ -29,12 +29,17 @@ public class MessageController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
+        System.out.println("📤 ===== MESSAGE SEND REQUEST =====");
+        System.out.println("Mentor USN: " + mentor.getUsn());
+        System.out.println("Student USN: " + request.getStudentUsn());
+        System.out.println("Message: " + request.getMessage());
+
         messageService.sendMessage(
                 mentor.getUsn(),
                 request.getStudentUsn(),
-                request.getMessage()
-        );
+                request.getMessage());
 
+        System.out.println("✅ Message saved to database");
         return ResponseEntity.ok("Message sent");
     }
 
@@ -47,7 +52,15 @@ public class MessageController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
+        System.out.println("📨 ===== GET STUDENT MESSAGES =====");
+        System.out.println("Student USN: " + user.getUsn());
+
         List<Message> messages = messageService.getStudentMessages(user.getUsn());
+
+        System.out.println("Messages found: " + messages.size());
+        messages.forEach(m -> {
+            System.out.println("  - Message ID: " + m.getId() + ", From: " + m.getMentorId() + ", Read: " + m.isRead());
+        });
 
         return ResponseEntity.ok(messages);
     }

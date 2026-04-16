@@ -245,8 +245,25 @@
                   // Couldn't check, default to setup for safety
                   window.location.href = "student_setup.html";
                 }
-              } else {
-                window.location.href = "mentor_dashboard.html";
+              } else if (role === "MENTOR") {
+                // Check if mentor has completed setup
+                const profileRes = await fetch("/api/mentor/me", {
+                  credentials: 'include'
+                });
+                
+                if (profileRes.ok) {
+                  const profileData = await profileRes.json();
+                  // If mentor has filled email and department, go to dashboard
+                  if (profileData.email && profileData.department) {
+                    window.location.href = "mentor_dashboard.html";
+                  } else {
+                    // First-time mentor, go to setup
+                    window.location.href = "mentor_setup.html";
+                  }
+                } else {
+                  // Couldn't check, default to setup for safety
+                  window.location.href = "mentor_setup.html";
+                }
               }
             } else {
               alert("Sign up successful! Please login.");

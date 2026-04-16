@@ -232,16 +232,6 @@
                     <option value="CE">CE</option>
                 </select>
             </div>
-
-            <div class="input-group">
-                <label>Submission Status</label>
-                <select id="statusFilter">
-                    <option value="">All Statuses</option>
-                    <option value="APPROVED">Approved</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="REJECTED">Rejected</option>
-                </select>
-            </div>
         </div>
         <button class="btn-apply" onclick="filterStudents()">Apply Filters</button>
     </div>
@@ -270,42 +260,105 @@
     function filterStudents() {
         const year = document.getElementById("yearFilter").value;
         const dept = document.getElementById("deptFilter").value;
-        const status = document.getElementById("statusFilter").value;
         const table = document.getElementById("studentsTable");
 
         table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:var(--muted)'>Updating directory...</td></tr>";
 
-        // Building query with status filter included
-        fetch(`/api/mentor/students?academicYear=${year}&department=${dept}&status=${status}`,{
-            credentials:"include"
+        console.log("=== FILTER STUDENTS DEBUG ===");
+        console.log("Year:", year);
+        console.log("Department:", dept);
+
+        // Build query parameters
+        let queryParams = new URLSearchParams();
+        if (year && year !== "") {
+            queryParams.append("academicYear", year);
+        }
+        if (dept && dept !== "") {
+            queryParams.append("department", dept);
+        }
+        
+        const apiUrl = `/api/mentor/students${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+        console.log("API URL:", apiUrl);
+
+        // First, check if mentor is authenticated
+        fetch('/api/mentor/me', {
+            credentials: "include"
         })
         .then(res => res.json())
+        .then(mentorData => {
+            console.log("Mentor authenticated:", mentorData);
+            
+            // Now fetch students with filters applied
+            return fetch(apiUrl, {
+                credentials: "include"
+            });
+        })
+        .then(res => {
+            console.log("Students response status:", res.status);
+            if (!res.ok) {
+                return res.text().then(text => {
+                    throw new Error('Failed to fetch students: ' + res.status + ' - ' + text);
+                });
+            }
+            return res.json();
+        })
         .then(data => {
+            console.log("Raw data received from API:", data);
+            console.log("Data type:", typeof data);
+            console.log("Is array:", Array.isArray(data));
+            
             table.innerHTML = "";
             
-            if(data.length === 0) {
-                table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:var(--muted)'>No mentees found matching those criteria.</td></tr>";
+            if (!data) {
+                console.warn("Data is null/undefined");
+                table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:#f87171'>No data received from server.</td></tr>";
                 return;
             }
 
-            data.forEach(student => {
+            if (!Array.isArray(data)) {
+                console.warn("Data is not an array:", data);
+                table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:#f87171'>Invalid data format: Expected array but got " + typeof data + "</td></tr>";
+                return;
+            }
+
+            if (data.length === 0) {
+                console.log("Array is empty - no students found");
+                table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:var(--muted)'>No mentees found matching the selected filters.</td></tr>";
+                return;
+            }
+
+            console.log("Found " + data.length + " students, rendering...");
+            let successCount = 0;
+            
+            data.forEach((student, index) => {
+                console.log("Processing student " + index + ":", student);
+                
+                if (!student.usn) {
+                    console.warn("Student missing USN:", student);
+                    return;
+                }
+                
                 const row = `
                 <tr>
-                    <td><div style="color:white; font-weight:600;">${student.name}</div></td>
-                    <td><code style="color:var(--accent);">${student.usn}</code></td>
-                    <td>${student.department}</td>
-                    <td>Year ${student.academicYear}</td>
+                    <td><div style="color:white; font-weight:600;">${student.name || '-'}</div></td>
+                    <td><code style="color:var(--accent);">${student.usn || '-'}</code></td>
+                    <td>${student.department || '-'}</td>
+                    <td>Year ${student.academicYear || '-'}</td>
                     <td style="text-align: right; padding-right: 24px;">
-                        <a href="mentor_viewstudent.html?usn=${student.usn}" class="btn-view">View Details</a>
+                        <a href="mentor_viewstudentprofile.html?usn=${student.usn}" class="btn-view">View Details</a>
                     </td>
                 </tr>
                 `;
                 table.innerHTML += row;
+                successCount++;
             });
+            
+            console.log("Successfully rendered " + successCount + " students");
         })
         .catch(err => {
-            console.error(err);
-            table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:#f87171'>System error: Connection lost.</td></tr>";
+            console.error("=== ERROR ===", err);
+            console.error("Error stack:", err.stack);
+            table.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:40px; color:#f87171'><strong>Error:</strong> " + err.message + "<br><small>Check browser console (F12) for more details</small></td></tr>";
         });
     }
 
