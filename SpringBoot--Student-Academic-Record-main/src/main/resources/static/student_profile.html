@@ -582,21 +582,15 @@
     <script>
         let editMode = false;
 
-        // ============================================
-        // DATE VALIDATION - PREVENT FUTURE DATES
-        // ============================================
         function setMaxDate(inputId) {
             const dateInput = document.getElementById(inputId);
             if (!dateInput) return;
-            
-            // Set max date to today
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
             const maxDate = `${yyyy}-${mm}-${dd}`;
             dateInput.max = maxDate;
-            
             console.log(`📅 Date field '${inputId}' max date set to: ${maxDate}`);
         }
 
@@ -605,7 +599,6 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             selectedDate.setHours(0, 0, 0, 0);
-            
             if (selectedDate > today) {
                 if (errorElement) {
                     errorElement.style.display = 'block';
@@ -625,24 +618,17 @@
             document.getElementById("viewMode").classList.toggle("hidden");
             document.getElementById("editMode").classList.toggle("hidden");
             document.getElementById("editToggleBtn").textContent = editMode ? "Cancel" : "Edit Profile";
-
             if (editMode) {
-                // Initialize date field with max date restriction when entering edit mode
                 setMaxDate('editDob');
-                
-                // Add real-time validation
                 const dobInput = document.getElementById('editDob');
                 if (dobInput) {
                     dobInput.addEventListener('change', function() {
                         validateDateNotInFuture(this, document.getElementById('dobEditError'));
-                        console.log('✓ DOB change event - validation checked');
                     });
-                    
                     dobInput.addEventListener('blur', function() {
                         validateDateNotInFuture(this, document.getElementById('dobEditError'));
                     });
                 }
-                
                 document.getElementById("editName").focus();
             }
         }
@@ -658,15 +644,12 @@
             const res = await fetch('/api/student/me', {
                 credentials: 'include'
             });
-
             if (!res.ok) {
                 alert("Unauthorized");
                 window.location = "index.html";
                 return;
             }
-
             const data = await res.json();
-
             document.getElementById("viewName").textContent = data.name || "-";
             document.getElementById("viewUsn").textContent = data.usn || "-";
             document.getElementById("viewEmail").textContent = data.email || "-";
@@ -675,7 +658,6 @@
             document.getElementById("viewYear").textContent = data.academicYear || "-";
             document.getElementById("viewMentorName").textContent = data.mentorName || "-";
             document.getElementById("viewMentorId").textContent = data.mentorId || "-";
-
             document.getElementById("editName").value = data.name || "";
             document.getElementById("editUsn").value = data.usn || "";
             document.getElementById("editEmail").value = data.email || "";
@@ -684,7 +666,6 @@
             document.getElementById("editYear").value = data.academicYear || "";
             document.getElementById("editMentorName").value = data.mentorName || "";
             document.getElementById("editMentorId").value = data.mentorId || "";
-
             loadActivityPoints();
             loadRejections();
         }
@@ -700,80 +681,48 @@
                 const res = await fetch('/api/student/activity-points', {
                     credentials: 'include'
                 });
-
                 if (res.ok) {
                     const data = await res.json();
                     document.getElementById("totalActivityScore").textContent = data.totalPoints || 0;
                 }
             } catch (err) {
-                console.error("Error loading activity points:", err);
+                console.error("Error:", err);
             }
         }
 
         async function loadRejections() {
             try {
-                console.log("\n═══════════════════════════════════════════════════════");
-                console.log("📬 LOADING REJECTED CERTIFICATES FROM SERVER");
-                console.log("═══════════════════════════════════════════════════════");
-                
                 const res = await fetch('/api/student/certificate-rejections', {
                     credentials: 'include'
                 });
-
-                console.log("✓ API Response Status:", res.status);
-
                 if (res.ok) {
                     const rejections = await res.json();
-                    console.log("✓ Rejections received from API:", rejections);
-                    console.log(`  Total rejections: ${rejections ? rejections.length : 0}`);
-                    
                     if (rejections && rejections.length > 0) {
-                        console.log("🎯 Found rejected certificates, displaying...");
                         displayRejections(rejections);
                     } else {
-                        console.log("ℹ️ No rejected certificates from API");
                         document.getElementById("rejectionsContainer").style.display = "none";
                     }
                 } else {
-                    console.log("⚠️ API error:", res.status);
                     document.getElementById("rejectionsContainer").style.display = "none";
                 }
             } catch (err) {
-                console.error("❌ Error loading rejections:", err);
+                console.error("Error:", err);
             }
         }
 
         function displayRejections(rejections) {
-            console.log("\n═══════════════════════════════════════════════════════");
-            console.log("📝 DISPLAYING REJECTIONS");
-            console.log("═══════════════════════════════════════════════════════");
-            
             const container = document.getElementById("rejectionsContainer");
             const list = document.getElementById("rejectionsList");
             list.innerHTML = "";
-
-            // Get dismissed notifications from localStorage (same key as dashboard)
             const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
-            console.log("🗑️ Currently dismissed rejections in localStorage:", dismissedNotifications);
-
-            // Filter out removed rejections using same ID format as dashboard
             const visibleRejections = rejections.filter(rejection => {
                 const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
-                const isDismissed = dismissedNotifications.includes(rejectionId);
-                console.log(`   ❓ ${rejectionId} - Dismissed: ${isDismissed}`);
-                return !isDismissed;
+                return !dismissedNotifications.includes(rejectionId);
             });
-
-            console.log(`✓ Total rejections from API: ${rejections.length}`);
-            console.log(`✓ Visible after filtering: ${visibleRejections.length}`);
-
             if (!visibleRejections || visibleRejections.length === 0) {
-                console.log("ℹ️ No rejections to display (all removed or empty)");
                 container.style.display = "none";
-                console.log("═══════════════════════════════════════════════════════\n");
                 return;
             }
-
             visibleRejections.forEach(rejection => {
                 const rejectionId = `rejected_${rejection.certificateType}_${rejection.rejectedDate}`;
                 const item = document.createElement("div");
@@ -783,7 +732,6 @@
                 item.style.justifyContent = "space-between";
                 item.style.alignItems = "flex-start";
                 item.style.gap = "10px";
-                
                 const contentDiv = document.createElement("div");
                 contentDiv.style.flex = "1";
                 contentDiv.innerHTML = `
@@ -791,7 +739,6 @@
                     <div>Rejected on: ${formatDate(rejection.rejectedDate)}</div>
                     ${rejection.rejectionNote ? `<div class="rejection-note"><strong>Mentor's Note:</strong><br>${rejection.rejectionNote}</div>` : ""}
                 `;
-                
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✕";
                 removeBtn.style.background = "#dc3545";
@@ -802,102 +749,69 @@
                 removeBtn.style.cursor = "pointer";
                 removeBtn.style.fontSize = "16px";
                 removeBtn.style.marginTop = "5px";
-                removeBtn.title = "Remove this rejection permanently";
+                removeBtn.title = "Remove permanently";
                 removeBtn.onclick = function() {
                     removeRejection(rejectionId);
                 };
-                
                 item.appendChild(contentDiv);
                 item.appendChild(removeBtn);
                 list.appendChild(item);
             });
-
-            console.log("✅ Rejections rendered in DOM");
-            console.log("📍 Showing rejections container");
             container.style.display = "block";
-            console.log("═══════════════════════════════════════════════════════\n");
         }
 
         function removeRejection(rejectionId) {
-            console.log("\n═══════════════════════════════════════════════════════");
-            console.log("🔌 PERMANENTLY DELETING REJECTION");
-            console.log("═══════════════════════════════════════════════════════");
-            console.log("Rejection ID:", rejectionId);
-            
-            // Get current dismissed list
             const dismissedNotifications = JSON.parse(localStorage.getItem("dismissedNotifications") || "[]");
-            console.log("📋 Current dismissed list:", dismissedNotifications);
-            
-            // Add this rejection to dismissed list (PERMANENT)
             if (!dismissedNotifications.includes(rejectionId)) {
                 dismissedNotifications.push(rejectionId);
                 localStorage.setItem("dismissedNotifications", JSON.stringify(dismissedNotifications));
-                console.log("💾 ✅ SAVED TO localStorage - PERMANENT DELETION");
-                console.log("📋 Updated dismissed list:", dismissedNotifications);
-            } else {
-                console.log("ℹ️ Already permanently deleted");
             }
-            
-            // Remove from DOM with animation
             const element = document.getElementById("rejection-" + rejectionId);
             if (element) {
                 element.style.opacity = "0";
                 element.style.transition = "opacity 0.3s ease";
                 setTimeout(() => {
                     element.remove();
-                    console.log("✅ Removed from display");
-                    
-                    // Check if there are any rejections left
                     const list = document.getElementById("rejectionsList");
                     if (list.children.length === 0) {
                         document.getElementById("rejectionsContainer").style.display = "none";
-                        console.log("📍 All rejections deleted - hiding container");
                     }
-                    console.log("═══════════════════════════════════════════════════════");
-                    console.log("🎯 PERMANENT DELETION COMPLETE - Will NOT reappear on relogin\n");
                 }, 300);
             }
         }
 
-        window.addEventListener("DOMContentLoaded", function () {
-            console.log("📄 Profile page loaded");
+        window.addEventListener("DOMContentLoaded", function() {
             loadProfile();
         });
 
-        document.getElementById("profileForm")
-            .addEventListener("submit", async (e) => {
-                e.preventDefault();
-
-                // ✅ VALIDATE DATE NOT IN FUTURE
-                const dobInput = document.getElementById("editDob");
-                if (!validateDateNotInFuture(dobInput, document.getElementById('dobEditError'))) {
-                    alert("❌ ERROR: Date of Birth cannot be in the future!\nPlease select a date on or before today.");
-                    dobInput.focus();
-                    return;
-                }
-
-                const payload = {
-                    name: document.getElementById("editName").value.trim(),
-                    department: document.getElementById("editDepartment").value.trim(),
-                    academicYear: parseInt(document.getElementById("editYear").value),
-                    dob: document.getElementById("editDob").value
-                };
-
-                const res = await fetch('/api/student/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    alert("Profile updated successfully!");
-                    cancelEdit();
-                    loadProfile();
-                } else {
-                    alert(await res.text());
-                }
+        document.getElementById("profileForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const dobInput = document.getElementById("editDob");
+            if (!validateDateNotInFuture(dobInput, document.getElementById('dobEditError'))) {
+                alert("Date cannot be in the future!");
+                dobInput.focus();
+                return;
+            }
+            const payload = {
+                name: document.getElementById("editName").value.trim(),
+                department: document.getElementById("editDepartment").value.trim(),
+                academicYear: parseInt(document.getElementById("editYear").value),
+                dob: document.getElementById("editDob").value
+            };
+            const res = await fetch('/api/student/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(payload)
             });
+            if (res.ok) {
+                alert("Updated!");
+                cancelEdit();
+                loadProfile();
+            } else {
+                alert(await res.text());
+            }
+        });
 
         loadProfile();
     </script>
