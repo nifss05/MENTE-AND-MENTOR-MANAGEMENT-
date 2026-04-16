@@ -547,8 +547,9 @@
                             <input type="text" id="editDepartment" required>
                         </div>
                         <div class="form-group">
-                            <label>Date of Birth</label>
+                            <label>Date of Birth <span style="color: #ff6b6b; font-size: 12px;\">(No future dates)</span></label>
                             <input type="date" id="editDob" required>
+                            <div id="dobEditError" style="color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none;">⚠️ Please select a date on or before today</div>
                         </div>
                         <div class="form-group">
                             <label>Academic Year</label>
@@ -581,6 +582,44 @@
     <script>
         let editMode = false;
 
+        // ============================================
+        // DATE VALIDATION - PREVENT FUTURE DATES
+        // ============================================
+        function setMaxDate(inputId) {
+            const dateInput = document.getElementById(inputId);
+            if (!dateInput) return;
+            
+            // Set max date to today
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const maxDate = `${yyyy}-${mm}-${dd}`;
+            dateInput.max = maxDate;
+            
+            console.log(`📅 Date field '${inputId}' max date set to: ${maxDate}`);
+        }
+
+        function validateDateNotInFuture(dateInput, errorElement) {
+            const selectedDate = new Date(dateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate.setHours(0, 0, 0, 0);
+            
+            if (selectedDate > today) {
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                    console.warn(`❌ Invalid date: ${dateInput.value} is in the future`);
+                }
+                return false;
+            } else {
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+                return true;
+            }
+        }
+
         function toggleEditMode() {
             editMode = !editMode;
             document.getElementById("viewMode").classList.toggle("hidden");
@@ -588,6 +627,22 @@
             document.getElementById("editToggleBtn").textContent = editMode ? "Cancel" : "Edit Profile";
 
             if (editMode) {
+                // Initialize date field with max date restriction when entering edit mode
+                setMaxDate('editDob');
+                
+                // Add real-time validation
+                const dobInput = document.getElementById('editDob');
+                if (dobInput) {
+                    dobInput.addEventListener('change', function() {
+                        validateDateNotInFuture(this, document.getElementById('dobEditError'));
+                        console.log('✓ DOB change event - validation checked');
+                    });
+                    
+                    dobInput.addEventListener('blur', function() {
+                        validateDateNotInFuture(this, document.getElementById('dobEditError'));
+                    });
+                }
+                
                 document.getElementById("editName").focus();
             }
         }
@@ -812,6 +867,14 @@
         document.getElementById("profileForm")
             .addEventListener("submit", async (e) => {
                 e.preventDefault();
+
+                // ✅ VALIDATE DATE NOT IN FUTURE
+                const dobInput = document.getElementById("editDob");
+                if (!validateDateNotInFuture(dobInput, document.getElementById('dobEditError'))) {
+                    alert("❌ ERROR: Date of Birth cannot be in the future!\nPlease select a date on or before today.");
+                    dobInput.focus();
+                    return;
+                }
 
                 const payload = {
                     name: document.getElementById("editName").value.trim(),

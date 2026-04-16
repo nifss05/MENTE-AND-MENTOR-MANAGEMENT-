@@ -272,13 +272,15 @@ button:not(.delete-btn):not(.back-btn):hover {
 
       <div class="date-row">
         <div class="form-group">
-          <label>From</label>
+          <label>From <span style="color: #ff6b6b; font-size: 12px;\">(No future dates)</span></label>
           <input type="date" id="fromDate">
+          <div id="fromDateError" style="color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none;">⚠️ Please select a date on or before today</div>
         </div>
 
         <div class="form-group">
-          <label>To</label>
+          <label>To <span style="color: #ff6b6b; font-size: 12px;\">(No future dates)</span></label>
           <input type="date" id="toDate">
+          <div id="toDateError" style="color: #ff6b6b; font-size: 12px; margin-top: 4px; display: none;">⚠️ Please select a date on or before today</div>
         </div>
       </div>
 
@@ -294,7 +296,114 @@ button:not(.delete-btn):not(.back-btn):hover {
 </div>
 
 <script>
+// ============================================
+// DATE VALIDATION - PREVENT FUTURE DATES
+// ============================================
+function setMaxDate(inputId) {
+  const dateInput = document.getElementById(inputId);
+  if (!dateInput) return;
+  
+  // Set max date to today
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const maxDate = `${yyyy}-${mm}-${dd}`;
+  dateInput.max = maxDate;
+  
+  console.log(`📅 Date field '${inputId}' max date set to: ${maxDate}`);
+}
+
+function validateDateNotInFuture(dateInput, errorElement) {
+  if (!dateInput.value) return true; // Empty dates are OK for optional fields
+  
+  const selectedDate = new Date(dateInput.value);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  selectedDate.setHours(0, 0, 0, 0);
+  
+  if (selectedDate > today) {
+    if (errorElement) {
+      errorElement.style.display = 'block';
+      console.warn(`❌ Invalid date: ${dateInput.value} is in the future`);
+    }
+    return false;
+  } else {
+    if (errorElement) {
+      errorElement.style.display = 'none';
+    }
+    return true;
+  }
+}
+
+function validateDateRange() {
+  const fromDate = document.getElementById('fromDate').value;
+  const toDate = document.getElementById('toDate').value;
+  
+  if (fromDate && toDate) {
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    
+    if (to < from) {
+      console.warn(`⚠️ Warning: End date is before start date`);
+      return false;
+    }
+  }
+  return true;
+}
+
+// Initialize date fields on page load
+document.addEventListener('DOMContentLoaded', function() {
+  setMaxDate('fromDate');
+  setMaxDate('toDate');
+  
+  // Add real-time validation
+  const fromDateInput = document.getElementById('fromDate');
+  const toDateInput = document.getElementById('toDate');
+  
+  if (fromDateInput) {
+    fromDateInput.addEventListener('change', function() {
+      validateDateNotInFuture(this, document.getElementById('fromDateError'));
+      validateDateRange();
+    });
+    fromDateInput.addEventListener('blur', function() {
+      validateDateNotInFuture(this, document.getElementById('fromDateError'));
+    });
+  }
+  
+  if (toDateInput) {
+    toDateInput.addEventListener('change', function() {
+      validateDateNotInFuture(this, document.getElementById('toDateError'));
+      validateDateRange();
+    });
+    toDateInput.addEventListener('blur', function() {
+      validateDateNotInFuture(this, document.getElementById('toDateError'));
+    });
+  }
+});
+
 async function saveAchievement() {
+  // ✅ VALIDATE DATES NOT IN FUTURE
+  const fromDateInput = document.getElementById('fromDate');
+  const toDateInput = document.getElementById('toDate');
+  
+  if (!validateDateNotInFuture(fromDateInput, document.getElementById('fromDateError'))) {
+    alert("❌ ERROR: Start date cannot be in the future!\nPlease select a date on or before today.");
+    fromDateInput.focus();
+    return;
+  }
+  
+  if (!validateDateNotInFuture(toDateInput, document.getElementById('toDateError'))) {
+    alert("❌ ERROR: End date cannot be in the future!\nPlease select a date on or before today.");
+    toDateInput.focus();
+    return;
+  }
+  
+  if (!validateDateRange()) {
+    alert("❌ ERROR: End date cannot be before start date!");
+    return;
+  }
+
   const body = {
     title: title.value,
     category: category.value,
@@ -316,6 +425,8 @@ async function saveAchievement() {
   description.value = "";
   fromDate.value = "";
   toDate.value = "";
+  
+  console.log('✅ Achievement saved successfully with validated dates');
 
   loadAchievements();
 }
